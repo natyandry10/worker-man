@@ -22,7 +22,11 @@ import {
   Maximize2,
   X,
   PieChart,
-  Camera
+  Camera,
+  LogOut,
+  Save,
+  History,
+  AlertTriangle
 } from 'lucide-react';
 
 import WelcomeScreen from './components/WelcomeScreen';
@@ -35,7 +39,8 @@ import {
   ColorConfig,
   ModelsDatabase,
   ColorResult,
-  PackedRow
+  PackedRow,
+  LocalSaveListItem
 } from './types';
 import {
   computeColorResult,
@@ -93,35 +98,68 @@ export default function App() {
     return saved ? JSON.parse(saved) : DEFAULT_DATABASE;
   });
 
-  // Order Meta
-  const [meta, setMeta] = useState<OrderMeta>({
-    order: '',
-    customer: '',
-    po: '',
-    refClient: '',
-    invoice: '',
-    style: '',
-    styleNumber: '',
-    sku: '',
-    yarn: '',
-    composition: '',
-    destination: '',
-    address: '',
-    pays: '',
-    portDepart: '',
-    portArrivee: '',
-    qty: '',
-    filename: ''
+  // Order Meta (with auto-save restore)
+  const [meta, setMeta] = useState<OrderMeta>(() => {
+    const saved = localStorage.getItem('packing_list_pro_current_meta');
+    return saved ? JSON.parse(saved) : {
+      order: '',
+      customer: '',
+      po: '',
+      refClient: '',
+      invoice: '',
+      style: '',
+      styleNumber: '',
+      sku: '',
+      yarn: '',
+      composition: '',
+      destination: '',
+      address: '',
+      pays: '',
+      portDepart: '',
+      portArrivee: '',
+      qty: '',
+      filename: ''
+    };
   });
 
-  // Packing strategy parameters
-  const [globalPackingMode, setGlobalPackingMode] = useState<'strict_solide' | 'mixte_autorise'>('strict_solide');
-  const [maxSizesPerBox, setMaxSizesPerBox] = useState<number>(3);
-  const [forceSingleCarton, setForceSingleCarton] = useState<boolean>(false);
+  // Packing strategy parameters (with auto-save restore)
+  const [globalPackingMode, setGlobalPackingMode] = useState<'strict_solide' | 'mixte_autorise'>(() => {
+    const saved = localStorage.getItem('packing_list_pro_current_globalPackingMode');
+    return (saved === 'strict_solide' || saved === 'mixte_autorise') ? saved : 'strict_solide';
+  });
 
-  // Interactive dynamic Colors state
-  const [colors, setColors] = useState<ColorConfig[]>([]);
+  const [maxSizesPerBox, setMaxSizesPerBox] = useState<number>(() => {
+    const saved = localStorage.getItem('packing_list_pro_current_maxSizesPerBox');
+    return saved ? Number(saved) : 3;
+  });
+
+  const [forceSingleCarton, setForceSingleCarton] = useState<boolean>(() => {
+    const saved = localStorage.getItem('packing_list_pro_current_forceSingleCarton');
+    return saved === 'true';
+  });
+
+  // Interactive dynamic Colors state (with auto-save restore)
+  const [colors, setColors] = useState<ColorConfig[]>(() => {
+    const saved = localStorage.getItem('packing_list_pro_current_colors');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [activeColorIdx, setActiveColorIdx] = useState<number>(0);
+
+  // Saved snapshots lists history database
+  const [savedLists, setSavedLists] = useState<LocalSaveListItem[]>(() => {
+    const saved = localStorage.getItem('packing_list_pro_saved_lists');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [isAutosaveEnabled, setIsAutosaveEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem('packing_list_pro_current_is_autosave_enabled');
+    return saved !== 'false'; // default to true
+  });
+
+  const [saveNameInput, setSaveNameInput] = useState<string>('');
+  const [savesError, setSavesError] = useState<string | null>(null);
+  const [savesSuccess, setSavesSuccess] = useState<string | null>(null);
 
   // Auto-complete choices
   const [custQuery, setCustQuery] = useState('');
@@ -148,7 +186,7 @@ export default function App() {
   const [isColorInputExpanded, setIsColorInputExpanded] = useState<boolean>(true);
 
   // Active Input Section Tab (separates metadata, strategy, and color sheet editing)
-  const [activeInputTab, setActiveInputTab] = useState<'meta' | 'strategy' | 'colors' | 'packing_list' | 'breakdown' | 'summary'>('colors');
+  const [activeInputTab, setActiveInputTab] = useState<'meta' | 'strategy' | 'colors' | 'packing_list' | 'breakdown' | 'summary' | 'saves'>('colors');
 
   // Print checklist parameters
   const [printSections, setPrintSections] = useState({
@@ -217,6 +255,27 @@ export default function App() {
       root.classList.remove('dark');
     }
   }, [darkMode]);
+
+  // Persistence for user saved snapshots database
+  useEffect(() => {
+    localStorage.setItem('packing_list_pro_saved_lists', JSON.stringify(savedLists));
+  }, [savedLists]);
+
+  // Sync isAutosaveEnabled setting
+  useEffect(() => {
+    localStorage.setItem('packing_list_pro_current_is_autosave_enabled', String(isAutosaveEnabled));
+  }, [isAutosaveEnabled]);
+
+  // Real-time background auto-saver
+  useEffect(() => {
+    if (isAutosaveEnabled) {
+      localStorage.setItem('packing_list_pro_current_meta', JSON.stringify(meta));
+      localStorage.setItem('packing_list_pro_current_globalPackingMode', globalPackingMode);
+      localStorage.setItem('packing_list_pro_current_maxSizesPerBox', String(maxSizesPerBox));
+      localStorage.setItem('packing_list_pro_current_forceSingleCarton', String(forceSingleCarton));
+      localStorage.setItem('packing_list_pro_current_colors', JSON.stringify(colors));
+    }
+  }, [meta, globalPackingMode, maxSizesPerBox, forceSingleCarton, colors, isAutosaveEnabled]);
 
   // Save database modifications
   const handleSaveDatabase = (newDb: ModelsDatabase) => {
@@ -640,6 +699,72 @@ export default function App() {
     setResults([]);
     resetColorsToDefault();
     setShowResetConfirm(false);
+  };
+
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // Save current active list to the database
+  const handleSaveCurrentList = (customName: string) => {
+    try {
+      const timestamp = new Date().toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const autoLabel = [
+        meta.order ? `Order #${meta.order}` : '',
+        meta.customer ? `${meta.customer}` : '',
+        meta.style ? `${meta.style}` : ''
+      ].filter(Boolean).join(' - ') || 'Fiche sans nom';
+
+      const finalName = customName.trim() || `${autoLabel} (${timestamp})`;
+      const newListItem: LocalSaveListItem = {
+        id: 'save_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
+        name: finalName,
+        savedAt: new Date().toISOString(),
+        meta: { ...meta },
+        globalPackingMode,
+        maxSizesPerBox,
+        forceSingleCarton,
+        colors: JSON.parse(JSON.stringify(colors)) // deep copy
+      };
+
+      setSavedLists(prev => [newListItem, ...prev]);
+      setSavesSuccess(`✅ Fiche sauvegardée avec succès : "${finalName}"`);
+      setSavesError(null);
+      setSaveNameInput('');
+      setTimeout(() => setSavesSuccess(null), 4000);
+    } catch (err: any) {
+      setSavesError(`❌ Erreur lors de la sauvegarde : ${err?.message || err}`);
+    }
+  };
+
+  // Load a specified list from the database
+  const handleLoadSavedList = (item: LocalSaveListItem) => {
+    try {
+      setMeta({ ...item.meta });
+      setGlobalPackingMode(item.globalPackingMode);
+      setMaxSizesPerBox(item.maxSizesPerBox);
+      setForceSingleCarton(item.forceSingleCarton);
+      setColors(JSON.parse(JSON.stringify(item.colors))); // deep copy
+      setHasGenerated(false);
+      setResults([]);
+      setSavesSuccess(`🔌 Fiche "${item.name}" rechargée avec succès !`);
+      setSavesError(null);
+      setTimeout(() => setSavesSuccess(null), 4000);
+    } catch (err: any) {
+      setSavesError(`❌ Erreur lors du rechargement de la fiche : ${err?.message || err}`);
+    }
+  };
+
+  // Delete a list snapshot with inline double click protection
+  const handleDeleteSavedList = (id: string, name: string) => {
+    setSavedLists(prev => prev.filter(item => item.id !== id));
+    setConfirmDeleteId(null);
+    setSavesSuccess(`🗑️ Sauvegarde "${name}" supprimée.`);
+    setTimeout(() => setSavesSuccess(null), 3500);
   };
 
   // Excel Exports
@@ -1204,6 +1329,14 @@ export default function App() {
             </button>
 
             <button
+              onClick={() => setIsAuthenticated(false)}
+              className="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-mono text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              🚪 SE DÉCONNECTER
+            </button>
+
+            <button
               onClick={() => setDarkMode(!darkMode)}
               className={`p-2 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
                 darkMode ? 'border-slate-800 bg-slate-900 text-amber-400 hover:text-white' : 'border-slate-300 bg-white text-slate-600 hover:text-black'
@@ -1519,6 +1652,38 @@ export default function App() {
                 </div>
               </div>
               <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'summary' ? 'translate-x-[2px] text-blue-500' : 'text-slate-600'}`} />
+            </button>
+
+            {/* RIBBON 7: SAUVEGARDES */}
+            <button
+              onClick={() => setActiveInputTab('saves')}
+              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
+                activeInputTab === 'saves'
+                  ? darkMode
+                    ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
+                    : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
+                  : darkMode
+                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+              }`}
+            >
+              <div
+                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
+                  activeInputTab === 'saves' ? 'bg-[#4f8ef7] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                }`}
+              />
+              <div className={`p-2 rounded-lg ${activeInputTab === 'saves' ? 'bg-[#4f8ef7]/10 text-[#4f8ef7]' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
+                <History className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0 pr-1 select-none">
+                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
+                  💾 SAUVEGARDES
+                </div>
+                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Sauvegarde & Historique
+                </div>
+              </div>
+              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'saves' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
             </button>
 
           </div>
@@ -2872,12 +3037,215 @@ export default function App() {
                   )}
                 </motion.div>
               )}
+
+              {activeInputTab === 'saves' && (
+                <motion.div
+                  key="saves-section"
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-6"
+                >
+                  {/* SAVE CREATOR GRID CONTROL */}
+                  <div className={`rounded-xl border p-5 ${darkMode ? 'bg-[#161a23] border-slate-800' : 'bg-white border-slate-200'} space-y-4 shadow-sm`}>
+                    <div className="flex items-center justify-between border-b pb-3 border-dashed border-slate-800/60">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-4 bg-blue-500 rounded-sm" />
+                        <h2 className={`text-xs font-mono font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-700'} uppercase`}>
+                          💾 Sauvegarder la Fiche Actuelle
+                        </h2>
+                      </div>
+
+                      {/* Autosave Switcher */}
+                      <button
+                        onClick={() => setIsAutosaveEnabled(!isAutosaveEnabled)}
+                        className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] font-bold cursor-pointer transition-all flex items-center gap-1.5 ${
+                          isAutosaveEnabled
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                            : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                        }`}
+                        title="Désactiver ou réactiver l'enregistrement automatique sur le navigateur"
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${isAutosaveEnabled ? 'bg-emerald-400 animate-ping' : 'bg-rose-400'}`} />
+                        <span>SAUVEGARDE AUTO : {isAutosaveEnabled ? 'ACTIVE' : 'ASSOUPIE'}</span>
+                      </button>
+                    </div>
+
+                    <div className="pt-2 space-y-3">
+                      <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        L'enregistrement automatique stocke vos modifications en temps réel. 
+                        Vous pouvez aussi figer des <strong>instantanés d'étapes nommés</strong> de vos fiches de colisage ci-dessous.
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row items-stretch gap-3 pt-1">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={saveNameInput}
+                            onChange={(e) => setSaveNameInput(e.target.value)}
+                            placeholder="Saisir un nom de sauvegarde personnalisé (vide = auto-génération)"
+                            className={`w-full text-xs font-mono rounded-lg border px-3 py-2.5 focus:outline-none transition-all ${
+                              darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-blue-500' : 'bg-[#f4f6fb] border-slate-300 text-slate-900 focus:border-[#4f8ef7]'
+                            }`}
+                          />
+                        </div>
+                        <button
+                          onClick={() => handleSaveCurrentList(saveNameInput)}
+                          className="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-[#4f8ef7] hover:brightness-110 text-white font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>CRÉER UN INSTANTANÉ</span>
+                        </button>
+                      </div>
+
+                      {/* Flash feedback alerts */}
+                      <AnimatePresence mode="wait">
+                        {savesSuccess && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono rounded-lg font-bold"
+                          >
+                            {savesSuccess}
+                          </motion.div>
+                        )}
+                        {savesError && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono rounded-lg font-bold"
+                          >
+                            {savesError}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* SAVED SLOTS GRID */}
+                  <div className={`rounded-xl border p-5 ${darkMode ? 'bg-[#161a23] border-slate-800' : 'bg-white border-slate-200'} space-y-4 shadow-sm pb-6`}>
+                    <div className="flex items-center justify-between border-b pb-3 border-dashed border-slate-800/60 font-mono">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-4 bg-purple-500 rounded-sm" />
+                        <h2 className={`text-xs font-mono font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-700'} uppercase`}>
+                          🗄️ Historique & Fiches Enregistrées ({savedLists.length})
+                        </h2>
+                      </div>
+                    </div>
+
+                    {savedLists.length === 0 ? (
+                      <div className="text-center py-10 px-4 space-y-3">
+                        <div className="w-12 h-12 bg-slate-800/30 text-slate-500 rounded-full flex items-center justify-center mx-auto">
+                          <History className="w-6 h-6 animate-pulse" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className={`text-xs font-bold font-mono uppercase ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>Aucune fiche sauvegardée</h4>
+                          <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                            Toutes vos fiches de colisage de cartons solides ou mixtes peuvent être archivées localement sur ce navigateur. 
+                            Créez-en une en utilisant le module ci-dessus !
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {savedLists.map((item) => {
+                          const isAutosaveEquivalent = meta.order === item.meta.order && meta.customer === item.meta.customer && meta.style === item.meta.style;
+                          
+                          return (
+                            <div
+                              key={item.id}
+                              className={`p-4 border rounded-xl transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+                                darkMode 
+                                  ? isAutosaveEquivalent
+                                    ? 'bg-[#18233c]/60 border-blue-500/40 hover:border-blue-500/60 shadow-[#4f8ef7]/5'
+                                    : 'bg-[#1e2330]/50 border-slate-800 hover:border-slate-700'
+                                  : isAutosaveEquivalent
+                                    ? 'bg-[#f4f7fc] border-blue-400/60 hover:border-blue-500/65 shadow-xs'
+                                    : 'bg-[#fcfdfe] border-slate-250 hover:border-slate-350'
+                              }`}
+                            >
+                              <div className="space-y-1.5 flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h4 className={`text-xs font-bold font-sans ${darkMode ? 'text-white' : 'text-slate-800'} truncate max-w-xl`}>
+                                    {item.name}
+                                  </h4>
+                                  {isAutosaveEquivalent && (
+                                    <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase font-mono bg-blue-500/15 border border-blue-500/30 text-[#4f8ef7]" title="Cette fiche correspond aux en-têtes actuellement ouverts">
+                                      Ouvert
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono text-slate-400">
+                                  <span>📅 {new Date(item.savedAt).toLocaleDateString('fr-FR')} {new Date(item.savedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <span>•</span>
+                                  <span>🏭 Client: <strong className={darkMode ? 'text-slate-350': 'text-slate-700'}>{item.meta.customer || '—'}</strong></span>
+                                  <span>•</span>
+                                  <span>📁 Commande: <strong className={darkMode ? 'text-slate-350' : 'text-slate-700'}>{item.meta.order || '—'}</strong></span>
+                                  <span>•</span>
+                                  <span className={`px-1 py-px rounded text-[9px] ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
+                                    {item.colors.length} Couleur{item.colors.length > 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Button interaction cluster */}
+                              <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                                <button
+                                  onClick={() => handleLoadSavedList(item)}
+                                  className={`px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all flex items-center gap-1 border hover:scale-[1.01] active:scale-[0.99] cursor-pointer ${
+                                    darkMode 
+                                      ? 'bg-[#1e293b] hover:bg-slate-700 border-slate-700 text-slate-100'
+                                      : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-800'
+                                  }`}
+                                  title="Recharger cette fiche dans l'éditeur de colisage"
+                                >
+                                  🔌 Restaurer
+                                </button>
+
+                                {confirmDeleteId !== item.id ? (
+                                  <button
+                                    onClick={() => setConfirmDeleteId(item.id)}
+                                    className="px-2.5 py-1.5 rounded-lg border border-red-500/30 bg-red-500/5 text-red-400 font-mono text-xs hover:bg-red-500/10 cursor-pointer"
+                                    title="Supprimer cette sauvegarde définitivement"
+                                  >
+                                    🗑️
+                                  </button>
+                                ) : (
+                                  <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/40 p-1 rounded-lg transition-all">
+                                    <button
+                                      onClick={() => handleDeleteSavedList(item.id, item.name)}
+                                      className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white font-black rounded text-[10px] cursor-pointer"
+                                    >
+                                      🚨 CONFIRMER
+                                    </button>
+                                    <button
+                                      onClick={() => setConfirmDeleteId(null)}
+                                      className={`px-1.5 py-1 text-slate-300 rounded text-[10px] cursor-pointer ${darkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-300 hover:bg-slate-400'}`}
+                                      title="Annuler"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </div>
 
         {/* CALCULATION RESULTS DISPLAY PANELS */}
-        {hasGenerated && activeInputTab !== 'packing_list' && activeInputTab !== 'breakdown' && (
+        {hasGenerated && activeInputTab !== 'packing_list' && activeInputTab !== 'breakdown' && activeInputTab !== 'saves' && (
           <div className="space-y-6 animate-fadeIn">
             
             {/* PRINT INDIVIDUAL COLOR PACKS */}

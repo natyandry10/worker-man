@@ -94,3 +94,14 @@ export interface ColorResult {
     sizes: { [sizeName: string]: number };
   };
 }
+
+export interface LocalSaveListItem {
+  id: string;
+  name: string;
+  savedAt: string;
+  meta: OrderMeta;
+  globalPackingMode: 'strict_solide' | 'mixte_autorise';
+  maxSizesPerBox: number;
+  forceSingleCarton: boolean;
+  colors: ColorConfig[];
+}

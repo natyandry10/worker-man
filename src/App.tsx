@@ -1125,7 +1125,7 @@ export default function App() {
   const summaryUniqueSizes = getOverallUniqueSizes();
 
   return (
-    <div className={`min-h-screen font-sans ${darkMode ? 'bg-[#0f1117] text-[#e8eaf0]' : 'bg-[#f0f2f8] text-[#1a1d2e]'} transition-colors duration-300 pb-12`}>
+    <div className={`min-h-screen font-sans ${darkMode ? 'bg-[#0a0d14] text-slate-100' : 'bg-[#f4f6fa] text-slate-900'} transition-colors duration-300 pb-12`}>
       
       {/* Dynamic Modal components */}
       {boxModalCtx?.isOpen && (
@@ -1329,24 +1329,27 @@ export default function App() {
       )}
       {/* HEADER & ACTIONS TOP BLOCK (STICKY) */}
       <div className={`sticky top-0 z-40 print:hidden transition-all duration-300 border-b pb-1.5 shadow-sm ${
-        darkMode ? 'bg-[#0f1117]/95 border-slate-800' : 'bg-[#f0f2f8]/95 border-slate-200'
+        darkMode ? 'bg-[#0a0d14]/95 border-slate-800/80 shadow-black/15' : 'bg-[#f4f6fa]/95 border-slate-200/80'
       } backdrop-blur-md`}>
         {/* Sleek Top Bar containing GENERATE, Reset, Excel, PDF, SQL Export, SQL Import, Mode toggle */}
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-2.5 flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-2.5 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-r from-[#4f8ef7] to-[#9b72f5] rounded-lg flex items-center justify-center shadow-lg shadow-[#4f8ef7]/15">
-              <Package className="w-3.5 h-3.5 text-white" />
+            <div className="w-7.5 h-7.5 bg-gradient-to-r from-[#ff5000] to-[#ff9900] rounded-lg flex items-center justify-center shadow-md shadow-orange-500/15">
+              <Package className="w-4 h-4 text-white" />
             </div>
-            <span className={`text-xs font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-800'}`}>PL Pro</span>
+            <div className="flex flex-col">
+              <span className={`text-xs font-black tracking-wider uppercase font-sans ${darkMode ? 'text-white' : 'text-slate-900'}`}>PL PRO <span className="text-[#ff5000]">ENTERPRISE</span></span>
+              <span className="text-[8px] font-mono tracking-widest text-[#94a3b8] -mt-0.5 uppercase">Alibaba & Amazon Compliant</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleGenerateList}
-              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 via-[#4f8ef7] to-[#9b72f5] hover:brightness-110 text-white font-bold rounded-lg text-[11px] transition-all focus:outline-none flex items-center gap-1 cursor-pointer shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99]"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-[#ff5000] to-[#ff8a00] hover:brightness-110 text-white font-bold rounded-lg text-[11px] transition-all focus:outline-none flex items-center gap-1.5 cursor-pointer shadow-md shadow-orange-500/10 hover:scale-[1.01] active:scale-[0.99] uppercase tracking-wider font-mono animate-pulse hover:animate-none"
             >
-              <Calculator className="w-3 h-3 text-white" />
-              <span>GÉNÉRER</span>
+              <Calculator className="w-3.5 h-3.5 text-white" />
+              <span>GÉNÉRER / COMPUTE</span>
             </button>
 
             {/* Admin / Utility actions moved from floating panel beside GÉNÉRER */}
@@ -1552,8 +1555,8 @@ export default function App() {
                   } ${
                     activeInputTab === 'meta'
                       ? darkMode
-                        ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
-                        : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/10 font-bold'
                       : darkMode
                         ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -1562,10 +1565,10 @@ export default function App() {
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'meta' ? 'bg-blue-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'meta' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'meta' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'meta' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <FileText className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1579,7 +1582,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'meta' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'meta' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
 
@@ -1593,8 +1596,8 @@ export default function App() {
                   } ${
                     activeInputTab === 'strategy'
                       ? darkMode
-                        ? 'bg-[#2a231b] border-orange-500/50 text-orange-400 shadow-md shadow-orange-500/10'
-                        : 'bg-white border-orange-500 text-orange-600 shadow-sm shadow-orange-500/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/10 font-bold'
                       : darkMode
                         ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -1603,10 +1606,10 @@ export default function App() {
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'strategy' ? 'bg-orange-500 scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'strategy' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'strategy' ? 'bg-orange-500/10 text-orange-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'strategy' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <Sliders className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1620,7 +1623,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'strategy' ? 'translate-x-[2px] text-orange-500' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'strategy' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
 
@@ -1634,8 +1637,8 @@ export default function App() {
                   } ${
                     activeInputTab === 'colors'
                       ? darkMode
-                        ? 'bg-[#231d2c] border-purple-500/55 text-purple-400 shadow-md shadow-purple-500/10'
-                        : 'bg-white border-purple-500 text-purple-600 shadow-sm shadow-purple-500/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/10 font-bold'
                       : darkMode
                         ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -1644,10 +1647,10 @@ export default function App() {
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'colors' ? 'bg-purple-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'colors' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'colors' ? 'bg-purple-500/10 text-purple-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'colors' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <Grid className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1661,7 +1664,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'colors' ? 'translate-x-[2px] text-purple-500' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'colors' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
               </div>
@@ -1689,8 +1692,8 @@ export default function App() {
                   } ${
                     activeInputTab === 'packing_list'
                       ? darkMode
-                        ? 'bg-[#1b3b2b] border-emerald-500/50 text-[#34d399] shadow-md shadow-emerald-500/10'
-                        : 'bg-white border-[#34d399] text-[#34d399] shadow-sm shadow-emerald-500/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/10 font-bold'
                       : darkMode
                         ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -1699,10 +1702,10 @@ export default function App() {
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'packing_list' ? 'bg-emerald-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'packing_list' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'packing_list' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'packing_list' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <FileSpreadsheet className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1716,7 +1719,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'packing_list' ? 'translate-x-[2px] text-emerald-500' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'packing_list' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
 
@@ -1730,20 +1733,20 @@ export default function App() {
                   } ${
                     activeInputTab === 'breakdown'
                       ? darkMode
-                        ? 'bg-[#3b321b] border-amber-500/50 text-[#fbbf24] shadow-md shadow-amber-500/10 font-bold'
-                        : 'bg-white border-[#fbbf24] text-[#fbbf24] shadow-sm shadow-amber-500/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/10 font-bold'
                       : darkMode
-                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white font-normal'
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
                   }`}
                   title="📊 BREAKDOWN : Résumé Couleur/Taille"
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'breakdown' ? 'bg-amber-500 scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'breakdown' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'breakdown' ? 'bg-amber-500/10 text-amber-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'breakdown' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <Grid className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1757,7 +1760,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'breakdown' ? 'translate-x-[2px] text-amber-500' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'breakdown' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
 
@@ -1771,8 +1774,8 @@ export default function App() {
                   } ${
                     activeInputTab === 'summary'
                       ? darkMode
-                        ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
-                        : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/10 font-bold'
                       : darkMode
                         ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -1781,10 +1784,10 @@ export default function App() {
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'summary' ? 'bg-blue-500 scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'summary' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'summary' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'summary' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <PieChart className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1798,7 +1801,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'summary' ? 'translate-x-[2px] text-blue-500' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'summary' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
 
@@ -1812,8 +1815,8 @@ export default function App() {
                   } ${
                     activeInputTab === 'saves'
                       ? darkMode
-                        ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
-                        : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-[#4f8ef7]/10 font-bold'
+                        ? 'bg-[#2a1305] border-[#ff5000]/50 text-[#ff5000] shadow-md shadow-[#ff5000]/10'
+                        : 'bg-white border-[#ff5000] text-[#ff5000] shadow-sm shadow-[#ff5000]/15 font-bold'
                       : darkMode
                         ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
                         : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -1822,10 +1825,10 @@ export default function App() {
                 >
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
-                      activeInputTab === 'saves' ? 'bg-[#4f8ef7] scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                      activeInputTab === 'saves' ? 'bg-[#ff5000] scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
                     }`}
                   />
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'saves' ? 'bg-[#4f8ef7]/10 text-[#4f8ef7]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'saves' ? 'bg-[#ff5000]/10 text-[#ff5000]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
                     <History className="w-3.5 h-3.5" />
                   </div>
                   {!isSidebarCollapsed && (
@@ -1839,7 +1842,7 @@ export default function App() {
                     </div>
                   )}
                   {!isSidebarCollapsed && (
-                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'saves' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'saves' ? 'translate-x-[2px] text-[#ff5000]' : 'text-slate-600'}`} />
                   )}
                 </button>
               </div>
@@ -1863,7 +1866,7 @@ export default function App() {
                     
                     {/* Plain Static Styled Header */}
                     <div className="flex items-center gap-2 border-b border-dashed pb-3 border-slate-800/60">
-                      <div className="w-2 h-4 bg-blue-500 rounded-sm" />
+                      <div className="w-2 h-4 bg-[#ff5000] rounded-sm" />
                       <h2 className={`text-xs font-mono font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-705'} uppercase`}>
                         📋 Informations Commande & Références
                       </h2>
@@ -1872,7 +1875,7 @@ export default function App() {
                     <div className="space-y-4 pt-1">
                       {/* Sub-section: References */}
                       <div className="space-y-4">
-              <div className="text-[10px] font-mono tracking-widest text-[#4f8ef7] font-bold uppercase flex items-center gap-1">
+              <div className="text-[10px] font-mono tracking-widest text-[#ff5000] font-bold uppercase flex items-center gap-1">
                 <ChevronRight className="w-3.5 h-3.5" /> Références En-têtes
               </div>
 
@@ -1884,7 +1887,7 @@ export default function App() {
                     value={meta.order}
                     onChange={(e) => handleMetaChange('order', e.target.value)}
                     className={`w-full text-xs font-mono rounded-lg border px-3 py-2 focus:outline-none transition-all ${
-                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-blue-505' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-blue-500'
+                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                     }`}
                     placeholder="ex: 2630001AA"
                   />
@@ -1898,7 +1901,7 @@ export default function App() {
                     onChange={(e) => handleMetaChange('customer', e.target.value)}
                     onFocus={() => { if (meta.customer) setShowCustDropdown(true); }}
                     className={`w-full text-xs font-mono rounded-lg border px-3 py-2 focus:outline-none transition-all ${
-                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-blue-505' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-blue-500'
+                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                     }`}
                     placeholder="ex: Johnnie-O"
                     autoComplete="off"
@@ -1929,7 +1932,7 @@ export default function App() {
                     value={meta.po}
                     onChange={(e) => handleMetaChange('po', e.target.value)}
                     className={`w-full text-xs font-mono rounded-lg border px-3 py-2 focus:outline-none transition-all ${
-                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-blue-505' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-blue-500'
+                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                     }`}
                     placeholder="ex: 08788-00"
                   />
@@ -1954,7 +1957,7 @@ export default function App() {
 
             {/* Sub-section: Order Details */}
             <div className="space-y-4 pt-2">
-              <div className="text-[10px] font-mono tracking-widest text-[#38d9a9] font-bold uppercase flex items-center gap-1">
+              <div className="text-[10px] font-mono tracking-widest text-[#ff5000] font-bold uppercase flex items-center gap-1">
                 <ChevronRight className="w-3.5 h-3.5" /> Informations de commande
               </div>
 
@@ -1967,7 +1970,7 @@ export default function App() {
                     value={meta.style}
                     onChange={(e) => handleMetaChange('style', e.target.value)}
                     className={`w-full text-xs font-mono rounded-lg border px-3 py-2 focus:outline-none transition-all ${
-                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-blue-505' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-blue-500'
+                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                     }`}
                     placeholder="ex: AMANDA"
                   />
@@ -2056,7 +2059,7 @@ export default function App() {
                     value={meta.filename}
                     onChange={(e) => handleMetaChange('filename', e.target.value)}
                     className={`w-full text-xs font-mono rounded-lg border px-3 py-2 focus:outline-none transition-all ${
-                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-blue-505' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-blue-500'
+                      darkMode ? 'bg-[#1f2430] border-slate-800 text-white focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20' : 'bg-[#f4f6fb] border-slate-350 text-slate-900 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                     }`}
                     placeholder="Nom automatique"
                   />
@@ -2069,7 +2072,7 @@ export default function App() {
                     value={colors.map(c => c.nom).filter(Boolean).join(', ')}
                     disabled
                     className={`w-full text-xs font-mono rounded-lg border px-3 py-2 font-medium opacity-70 ${
-                      darkMode ? 'bg-slate-900 border-slate-800 text-blue-400' : 'bg-slate-100 border-slate-300 text-blue-600'
+                      darkMode ? 'bg-slate-900 border-slate-800 text-[#ff5000]/85' : 'bg-slate-100 border-slate-300 text-[#ff5000]'
                     }`}
                   />
                 </div>
@@ -2123,11 +2126,11 @@ export default function App() {
                 onClick={() => handleSelectPackingMode('strict_solide')}
                 className={`p-4 rounded-xl border-2 text-left cursor-pointer transition-all flex items-start gap-3 ${
                   globalPackingMode === 'strict_solide'
-                    ? 'border-blue-500 bg-blue-500/5 text-blue-400'
+                    ? 'border-[#ff5000] bg-[#ff5000]/5 text-[#ff5000]'
                     : 'border-slate-800/80 bg-slate-900/20 text-slate-400 hover:border-slate-700'
                 }`}
               >
-                <div className="p-2.5 bg-blue-500 rounded-lg text-white">
+                <div className="p-2.5 bg-[#ff5000] rounded-lg text-white">
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
@@ -2229,65 +2232,65 @@ export default function App() {
                   transition={{ duration: 0.15 }}
                 >
                   {/* SPREADSHEET COLORS EDITOR */}
-                  <div className={`rounded-xl border p-5 ${darkMode ? 'bg-[#161a23] border-slate-800' : 'bg-white border-slate-200'} space-y-4 transition-all duration-300 shadow-sm`}>
+                  <div className={`rounded-xl border p-5 ${darkMode ? 'bg-[#121522] border-slate-800/80 shadow-black/25' : 'bg-white border-slate-200'} space-y-4 transition-all duration-300 shadow-sm`}>
                     
                     {/* Plain Static Styled Header */}
                     <div className="flex items-center gap-2 border-b border-dashed pb-3 border-slate-800/60">
-                      <div className="w-2 h-4 bg-purple-500 rounded-sm" />
-                      <h2 className={`text-xs font-mono font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-705'} uppercase`}>
+                      <div className="w-2 h-4 bg-[#ff5000] rounded-sm" />
+                      <h2 className={`text-xs font-sans font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-700'} uppercase`}>
                         ⌨️ Saisie des colisages par Couleur
                       </h2>
                     </div>
 
                     <div className="space-y-4">
-                  {/* Config workspace tabs */}
-            <div className={`flex flex-wrap items-center justify-between gap-3 p-2 border rounded-xl transition-all duration-300 ${
-              darkMode ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-100/60 border-slate-200'
-            }`}>
-              <div className="flex flex-wrap gap-1.5">
-                {colors.map((c, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setActiveColorIdx(idx);
-                    }}
-                    className={`px-3.5 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${
-                      activeColorIdx === idx
-                        ? darkMode
-                          ? 'bg-[#1f2430] border border-blue-500/50 text-[#4f8ef7] font-extrabold shadow-md'
-                          : 'bg-white border border-[#4f8ef7] text-[#4f8ef7] font-extrabold shadow-sm'
-                        : darkMode
-                          ? 'bg-[#1a1d27] border border-slate-800/50 text-slate-400 hover:text-white hover:border-slate-700'
-                          : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-950 hover:border-slate-350 shadow-xs'
-                    }`}
-                  >
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PALETTE[idx % PALETTE.length] }} />
-                    {c.nom || `COULEUR ${idx + 1}`}
-                  </button>
-                ))}
-              </div>
+                      {/* Config workspace tabs */}
+                      <div className={`flex flex-wrap items-center justify-between gap-3 p-2 border rounded-xl transition-all duration-300 ${
+                        darkMode ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-100/60 border-slate-200'
+                      }`}>
+                        <div className="flex flex-wrap gap-1.5">
+                          {colors.map((c, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setActiveColorIdx(idx);
+                              }}
+                              className={`px-3.5 py-2 rounded-lg text-xs font-sans font-bold transition-all flex items-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${
+                                activeColorIdx === idx
+                                  ? darkMode
+                                    ? 'bg-[#2a1305] border border-[#ff5000]/50 text-[#ff5000] font-extrabold shadow-md'
+                                    : 'bg-[#ff5000]/5 border border-[#ff5000]/60 text-[#ff5000] font-extrabold shadow-sm'
+                                  : darkMode
+                                    ? 'bg-[#1a1d27] border border-slate-800/50 text-slate-400 hover:text-white hover:border-slate-700'
+                                    : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-950 hover:border-slate-350 shadow-xs'
+                              }`}
+                            >
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PALETTE[idx % PALETTE.length] }} />
+                              {c.nom || `COULEUR ${idx + 1}`}
+                            </button>
+                          ))}
+                        </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={handleAddColorTab}
-                  className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-[#4f8ef7] font-bold rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1"
-                >
-                  <Plus className="w-3.5 h-3.5" /> ＋ Couleur
-                </button>
-                <button
-                  onClick={handleRemoveActiveColorTab}
-                  className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> － Couleur
-                </button>
-              </div>
-            </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleAddColorTab}
+                            className="px-3 py-1.5 bg-[#ff5000]/10 hover:bg-[#ff5000]/20 border border-[#ff5000]/30 text-[#ff5000] font-sans font-bold rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> ＋ Couleur
+                          </button>
+                          <button
+                            onClick={handleRemoveActiveColorTab}
+                            className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> － Couleur
+                          </button>
+                        </div>
+                      </div>
 
             {/* Active Tab Workspace Panel */}
             {colors[activeColorIdx] && (
               <div className="space-y-4 pt-1 animate-fadeIn">
                 <div className={`flex flex-wrap items-center gap-4 justify-between border rounded-xl p-4 transition-all duration-300 ${
-                  darkMode ? 'bg-[#1f2430]/30 border-slate-800/50' : 'bg-[#f4f6fb]/50 border-slate-205'
+                  darkMode ? 'bg-[#1f2430]/30 border-slate-800/50' : 'bg-[#f4f6fb]/50 border-slate-200'
                 }`}>
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 rounded-md border border-slate-700" style={{ backgroundColor: PALETTE[activeColorIdx % PALETTE.length] }} />
@@ -2295,7 +2298,7 @@ export default function App() {
                       type="text"
                       value={colors[activeColorIdx].nom}
                       onChange={(e) => handleUpdateColorName(e.target.value)}
-                      className={`text-sm font-mono font-bold uppercase py-1 border-b border-dashed focus:border-blue-500 bg-transparent focus:outline-none transition-colors ${
+                      className={`text-sm font-mono font-bold uppercase py-1 border-b border-dashed focus:border-[#ff5000] bg-transparent focus:outline-none transition-colors ${
                         darkMode ? 'border-slate-700 text-white' : 'border-slate-300 text-slate-800'
                       }`}
                       placeholder="NOM COULEUR"
@@ -2309,7 +2312,7 @@ export default function App() {
                       onClick={() => handleUpdateTabMode('strict_solide')}
                       className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                         colors[activeColorIdx].mode === 'strict_solide'
-                          ? 'bg-blue-500 border border-blue-500 text-white shadow-md'
+                          ? 'bg-[#ff5000] border border-[#ff5000] text-white shadow-md'
                           : darkMode
                             ? 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
                             : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
@@ -2346,7 +2349,7 @@ export default function App() {
 
                     <button
                       onClick={handleAddSizeColumn}
-                      className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-[#4f8ef7] font-mono text-xs font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1"
+                      className="px-3 py-1.5 bg-[#ff5000]/10 hover:bg-[#ff5000]/20 border border-[#ff5000]/30 text-[#ff5000] font-mono text-xs font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1"
                       title="Ajouter une colonne de taille au tableau"
                     >
                       <Plus className="w-3.5 h-3.5" /> ＋ Taille
@@ -2381,8 +2384,8 @@ export default function App() {
                       }}
                       className={`w-full p-2 border rounded-lg text-xs font-mono outline-none transition-all cursor-pointer ${
                         darkMode
-                          ? 'border-slate-800 bg-[#161a23] text-slate-205 hover:border-slate-700 focus:border-blue-500'
-                          : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 focus:border-[#4f8ef7]'
+                          ? 'border-slate-800 bg-[#161a23] text-slate-205 hover:border-slate-700 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
+                          : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                       }`}
                     >
                       <option value="">-- Sélectionner Poids Pièce --</option>
@@ -2417,8 +2420,8 @@ export default function App() {
                       }}
                       className={`w-full p-2 border rounded-lg text-xs font-mono outline-none transition-all cursor-pointer ${
                         darkMode
-                          ? 'border-slate-800 bg-[#161a23] text-slate-205 hover:border-slate-700 focus:border-blue-500'
-                          : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 focus:border-[#4f8ef7]'
+                          ? 'border-slate-800 bg-[#161a23] text-slate-205 hover:border-slate-700 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
+                          : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                       }`}
                     >
                       <option value="">-- Sélectionner Poids Carton --</option>
@@ -2453,8 +2456,8 @@ export default function App() {
                       }}
                       className={`w-full p-2 border rounded-lg text-xs font-mono outline-none transition-all cursor-pointer ${
                         darkMode
-                          ? 'border-slate-800 bg-[#161a23] text-slate-205 hover:border-slate-700 focus:border-blue-500'
-                          : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 focus:border-[#4f8ef7]'
+                          ? 'border-slate-800 bg-[#161a23] text-slate-205 hover:border-slate-700 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
+                          : 'border-slate-300 bg-white text-slate-800 hover:border-slate-400 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/20'
                       }`}
                     >
                       <option value="">-- Sélectionner Dimensions --</option>
@@ -2494,8 +2497,8 @@ export default function App() {
                               onChange={(e) => handleSizeHeaderChange(idx, e.target.value)}
                               className={`w-full text-center border font-mono font-bold px-2 py-1.5 rounded-md focus:outline-none uppercase transition-all ${
                                 darkMode
-                                  ? 'bg-[#1f2430] border-transparent text-white focus:border-blue-500 hover:border-slate-800'
-                                  : 'bg-white border-slate-200 text-slate-800 focus:border-[#4f8ef7] hover:border-slate-300 hover:shadow-xs'
+                                  ? 'bg-[#1f2430] border-transparent text-white focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 hover:border-slate-800'
+                                  : 'bg-white border-slate-200 text-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 hover:border-slate-300 hover:shadow-xs'
                               }`}
                             />
                           </th>
@@ -2519,8 +2522,8 @@ export default function App() {
                               onChange={(e) => handleUpdateSizeCell(sz, 'qtyTot', e.target.value)}
                               className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
                                 darkMode
-                                  ? 'bg-[#222636] border-slate-800 focus:border-blue-500 text-white'
-                                  : 'bg-white border-slate-200 focus:border-[#4f8ef7] text-slate-850 hover:border-slate-300'
+                                  ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-white'
+                                  : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-850 hover:border-slate-300'
                               }`}
                               placeholder="0"
                             />
@@ -2544,8 +2547,8 @@ export default function App() {
                               onChange={(e) => handleUpdateSizeCell(sz, 'cap', e.target.value)}
                               className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
                                 darkMode
-                                  ? 'bg-[#222636] border-slate-800 focus:border-blue-500 text-slate-306'
-                                  : 'bg-white border-slate-200 focus:border-[#4f8ef7] text-slate-750 hover:border-slate-300'
+                                  ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-306'
+                                  : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-750 hover:border-slate-300'
                               }`}
                               placeholder="25"
                             />
@@ -2568,8 +2571,8 @@ export default function App() {
                               onChange={(e) => handleUpdateSizeCell(sz, 'sku', e.target.value)}
                               className={`w-full text-center py-1 font-mono font-semibold text-[11px] uppercase rounded-md border focus:outline-none transition-all ${
                                 darkMode
-                                  ? 'bg-[#222636] border-slate-800 focus:border-blue-500 text-emerald-350'
-                                  : 'bg-white border-slate-200 focus:border-[#4f8ef7] text-emerald-600 hover:border-slate-300'
+                                  ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-emerald-350'
+                                  : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-emerald-600 hover:border-slate-300'
                               }`}
                               placeholder="SKU"
                             />
@@ -3044,17 +3047,17 @@ export default function App() {
                   ) : (
                     <div className="space-y-6 animate-fadeIn">
                       {/* Dashboard Metrics Header */}
-                      <div className={`rounded-xl border p-5 shadow-sm ${darkMode ? 'bg-[#161a23] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <div className="bg-[#4f8ef7]/10 border border-blue-500/20 font-mono font-bold px-4 py-3 text-[#4f8ef7] rounded-lg text-xs mb-6 uppercase flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
+                      <div className={`rounded-xl border p-5 shadow-sm ${darkMode ? 'bg-[#111522] border-slate-800/80 shadow-black/20' : 'bg-white border-slate-200'}`}>
+                        <div className="bg-[#ff5000]/5 border border-[#ff5000]/20 font-sans font-extrabold px-4 py-3 text-[#ff5000] rounded-lg text-xs mb-6 uppercase flex items-center gap-2 tracking-wider">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5000] animate-pulse" />
                           <span>📊 TABLEAU DE BORD DE SYNTHÈSE DES EXPÉDITIONS</span>
                         </div>
 
                         {/* 📝 RÉFÉRENCES & COORDONNÉES DE LA COMMANDE (DETAILED ORDER INFO) */}
-                        <div className={`mb-6 p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className={`text-xs font-mono font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5 ${darkMode ? 'text-slate-350' : 'text-slate-700'}`}>
-                            <span className="w-1.5 h-3 bg-blue-500 rounded-sm" />
-                            <span>📝 DÉTAILS DE LA COMMANDE & RÉFÉRENCES</span>
+                        <div className={`mb-6 p-4 rounded-xl border ${darkMode ? 'bg-slate-900/30 border-slate-800/60' : 'bg-[#fcfdfe] border-slate-200 shadow-xs'}`}>
+                          <div className={`text-xs font-sans font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>
+                            <span className="w-1.5 h-3.5 bg-[#ff5000] rounded-sm" />
+                            <span>📝 DÉTAILS DE LA COMMANDE & RÉFÉRENCES (ALIBABA-AMAZON SHEET)</span>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
                             <div>
@@ -3093,29 +3096,29 @@ export default function App() {
                         </div>
 
                         {/* Top Bento Grid of Totals */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 text-slate-900 border-slate-200'}`}>
-                            <div className="text-[10px] uppercase font-mono tracking-widest text-slate-500 font-bold">Total Pièces</div>
-                            <div className="text-2xl font-black text-amber-500 font-mono mt-1">{grandTotals.p.toLocaleString('fr-FR')}</div>
-                            <div className="text-[10px] text-slate-500 mt-1 font-mono">Pièces expédiées</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                          <div className={`p-4 rounded-xl border transition-all duration-300 ${darkMode ? 'bg-slate-900/30 border-slate-800/60' : 'bg-white text-slate-900 border-slate-200 shadow-xs'}`}>
+                            <div className={`text-[10px] uppercase font-sans tracking-widest font-extrabold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Total Pièces</div>
+                            <div className={`text-2xl font-black font-mono mt-1 ${darkMode ? 'text-orange-500' : 'text-[#ff5000]'}`}>{grandTotals.p.toLocaleString('fr-FR')}</div>
+                            <div className={`text-[9.5px] mt-1 font-mono ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Pcs expédiées</div>
                           </div>
 
-                          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 text-slate-900 border-slate-200'}`}>
-                            <div className="text-[10px] uppercase font-mono tracking-widest text-slate-500 font-bold">Total Cartons</div>
-                            <div className="text-2xl font-black text-slate-350 font-mono mt-1">{grandTotals.c}</div>
-                            <div className="text-[10px] text-slate-500 mt-1 font-mono">Cartons de colisage</div>
+                          <div className={`p-4 rounded-xl border transition-all duration-300 ${darkMode ? 'bg-slate-900/30 border-slate-800/60' : 'bg-white text-slate-900 border-slate-200 shadow-xs'}`}>
+                            <div className={`text-[10px] uppercase font-sans tracking-widest font-extrabold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Total Cartons</div>
+                            <div className={`text-2xl font-black font-mono mt-1 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{grandTotals.c}</div>
+                            <div className={`text-[9.5px] mt-1 font-mono ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Cartons colisage</div>
                           </div>
 
-                          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 text-slate-900 border-slate-200'}`}>
-                            <div className="text-[10px] uppercase font-mono tracking-widest text-slate-500 font-bold">Poids Global</div>
-                            <div className="text-2xl font-black text-teal-400 font-mono mt-1">{grandTotals.g.toFixed(2)} KG</div>
-                            <div className="text-[11px] text-slate-500 mt-1 font-mono">Poids Net: {grandTotals.n.toFixed(2)} KG</div>
+                          <div className={`p-4 rounded-xl border transition-all duration-300 ${darkMode ? 'bg-slate-900/30 border-slate-800/60' : 'bg-white text-slate-900 border-slate-200 shadow-xs'}`}>
+                            <div className={`text-[10px] uppercase font-sans tracking-widest font-extrabold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Poids Global</div>
+                            <div className={`text-2xl font-black font-mono mt-1 ${darkMode ? 'text-teal-400' : 'text-teal-600'}`}>{grandTotals.g.toFixed(1)} KG</div>
+                            <div className={`text-[9.5px] mt-1 font-mono ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>N.W: {grandTotals.n.toFixed(1)} KG</div>
                           </div>
 
-                          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 text-slate-900 border-slate-200'}`}>
-                            <div className="text-[10px] uppercase font-mono tracking-widest text-slate-500 font-bold">Volume Total (CBM)</div>
-                            <div className="text-2xl font-black text-red-500 font-mono mt-1">{grandTotals.v.toFixed(3)} m³</div>
-                            <div className="text-[10px] text-slate-500 mt-1 font-mono">Estimation cubage</div>
+                          <div className={`p-4 rounded-xl border transition-all duration-300 ${darkMode ? 'bg-slate-900/30 border-slate-800/60' : 'bg-white text-slate-900 border-slate-200 shadow-xs'}`}>
+                            <div className={`text-[10px] uppercase font-sans tracking-widest font-extrabold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Volume Total</div>
+                            <div className={`text-2xl font-black font-mono mt-1 ${darkMode ? 'text-rose-450' : 'text-rose-600'}`}>{grandTotals.v.toFixed(3)} m³</div>
+                            <div className={`text-[9.5px] mt-1 font-mono ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Cubage estimé</div>
                           </div>
                         </div>
 

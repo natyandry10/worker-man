@@ -43,10 +43,10 @@ export default function WelcomeScreen({ onSuccess }: WelcomeScreenProps) {
           borderColor: "rgba(59, 130, 246, 0.35)",
           transition: { duration: 0.4, ease: "easeOut" }
         }}
-        className="w-full max-w-md bg-[#161a23]/95 backdrop-blur-xl border border-slate-700/60 rounded-2xl shadow-2xl p-8 text-center relative overflow-hidden"
+        className="w-full max-w-md bg-[#111422]/95 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-2xl p-8 text-center relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-[#4f8ef7] to-[#9b72f5]" />
-
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#ff5000] to-[#ff9900]" />
+ 
         <div className="flex justify-center mb-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.4, rotate: -25 }}
@@ -60,31 +60,31 @@ export default function WelcomeScreen({ onSuccess }: WelcomeScreenProps) {
             whileHover={{
               scale: 1.12,
               rotate: 8,
-              boxShadow: "0 10px 25px -4px rgba(59, 130, 246, 0.35)",
+              boxShadow: "0 10px 25px -4px rgba(255, 80, 0, 0.35)",
               transition: { type: "spring", stiffness: 300, damping: 15 }
             }}
             whileTap={{ scale: 0.95 }}
-            className="w-16 h-16 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 cursor-pointer"
+            className="w-16 h-16 bg-gradient-to-tr from-[#ff5000] to-[#ff9a00] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20 cursor-pointer"
           >
             <Package className="w-8 h-8" />
           </motion.div>
         </div>
-
+ 
         <motion.h1
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-          className="text-2xl font-bold font-sans text-slate-100 tracking-tight"
+          className="text-2xl font-black font-sans text-white tracking-tight"
         >
-          PACKING LIST PRO
+          PL PRO <span className="text-[#ff5000]">ENTERPRISE</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, letterSpacing: "0.05em" }}
           animate={{ opacity: 1, letterSpacing: "0.15em" }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.45 }}
-          className="text-xs font-mono text-slate-400 mt-1 mb-8"
+          className="text-xs font-mono text-slate-400 mt-1 mb-8 uppercase tracking-widest"
         >
-          LOGISTICS OFFICER SYSTEM — v10.0
+          ALIBABA & AMAZON LOGISTICS PARTNER SYSTEM
         </motion.p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,7 +97,7 @@ export default function WelcomeScreen({ onSuccess }: WelcomeScreenProps) {
                 setPassword(e.target.value);
                 if (error) setError('');
               }}
-              className="w-full text-center bg-[#1f2430] border border-slate-700 rounded-lg py-3 px-4 text-white font-mono font-bold tracking-[0.2em] placeholder:text-slate-500 placeholder:tracking-normal focus:outline-none focus:border-blue-500 transition-all text-sm"
+              className="w-full text-center bg-[#181c28] border border-slate-800 rounded-lg py-3 px-4 text-white font-mono font-bold tracking-[0.2em] placeholder:text-slate-500 placeholder:tracking-normal focus:outline-none focus:border-[#ff5000] transition-all text-sm"
               autoFocus
             />
           </div>
@@ -117,7 +117,7 @@ export default function WelcomeScreen({ onSuccess }: WelcomeScreenProps) {
 
           <button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-[#9b72f5] hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+            className="w-full py-3 bg-gradient-to-r from-[#ff5000] to-[#ff9900] hover:brightness-110 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:shadow-orange-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm cursor-pointer font-sans"
           >
             <Lock className="w-4 h-4" />
             ENTRER SÉCURISÉ

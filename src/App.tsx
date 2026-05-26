@@ -1533,48 +1533,15 @@ export default function App() {
               </button>
             </div>
 
-            {/* SEGMENTED PAGE CONTROL (Saisie & réparation vs Suivi & livrable) */}
-            <div className={`p-1 rounded-xl flex gap-1 ${darkMode ? 'bg-slate-900/60' : 'bg-slate-200/50'} ${isSidebarCollapsed ? 'flex-col items-center' : 'w-full mb-2'}`}>
-              <button
-                onClick={() => handleSwitchSidebarPage('saisie')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-1 text-[11px] font-extrabold font-mono tracking-wider rounded-lg transition-all cursor-pointer ${
-                  sidebarActivePage === 'saisie'
-                    ? darkMode
-                      ? 'bg-[#1b263b] text-[#4f8ef7] shadow-sm shadow-[#4f8ef7]/15'
-                      : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm font-extrabold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/20'
-                }`}
-                title="Saisie & Réparation"
-              >
-                <span className="text-xs">✍️</span>
-                {!isSidebarCollapsed && <span className="text-[10px] uppercase">Saisie</span>}
-              </button>
-              <button
-                onClick={() => handleSwitchSidebarPage('suivi')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-1 text-[11px] font-extrabold font-mono tracking-wider rounded-lg transition-all cursor-pointer ${
-                  sidebarActivePage === 'suivi'
-                    ? darkMode
-                      ? 'bg-[#1b3b2b] text-[#34d399] shadow-sm shadow-emerald-500/15'
-                      : 'bg-white border-emerald-500 text-emerald-600 shadow-sm font-extrabold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/20'
-                }`}
-                title="Suivi & Livrable"
-              >
-                <span className="text-xs">📦</span>
-                {!isSidebarCollapsed && <span className="text-[10px] uppercase">Suivi</span>}
-              </button>
-            </div>
-
-            {/* SECTION 1: SAISIE & CONFIGURATION */}
-            {sidebarActivePage === 'saisie' && (
-              <div className={`flex flex-col gap-1.5 ${isSidebarCollapsed ? 'items-center' : 'w-full'}`}>
-                {!isSidebarCollapsed && (
-                  <div className={`px-1 text-[9px] font-mono tracking-wider font-extrabold uppercase mb-1 transition-colors select-none ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    ✍️ Saisie & Réparation
-                  </div>
-                )}
+            {/* SECTION 1: SAISIE (REFERENCE / STRATEGY / COLISAGE) */}
+            <div className={`flex flex-col gap-1.5 ${isSidebarCollapsed ? 'items-center' : 'w-full'}`}>
+              {!isSidebarCollapsed && (
+                <div className={`px-1 text-[9px] font-mono tracking-wider font-extrabold uppercase mb-1 transition-colors select-none ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  ✍️ SAISIE
+                </div>
+              )}
               
-              <div className={isSidebarCollapsed ? 'flex flex-col gap-2' : 'grid grid-cols-2 lg:grid-cols-1 gap-2 w-full'}>
+              <div className={isSidebarCollapsed ? 'flex flex-col gap-2' : 'flex flex-col gap-1.5 w-full'}>
                 {/* RIBBON 1: RÉFÉRENCES */}
                 <button
                   onClick={() => setActiveInputTab('meta')}
@@ -1663,7 +1630,7 @@ export default function App() {
                   className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
                     isSidebarCollapsed 
                       ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
-                      : 'p-2.5 text-left w-full col-span-2 lg:col-span-1'
+                      : 'p-2.5 text-left w-full'
                   } ${
                     activeInputTab === 'colors'
                       ? darkMode
@@ -1699,18 +1666,19 @@ export default function App() {
                 </button>
               </div>
             </div>
-            )}
 
-            {/* SECTION 2: EXPLOITATION & DOCUMENTS */}
-            {sidebarActivePage === 'suivi' && (
-              <div className={`flex flex-col gap-1.5 ${isSidebarCollapsed ? 'items-center' : 'w-full'}`}>
-                {!isSidebarCollapsed && (
-                  <div className={`px-1 text-[9px] font-mono tracking-wider font-extrabold uppercase mb-1 transition-colors select-none ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    📦 Suivi & Livrable
-                  </div>
-                )}
+            {/* SEPARATOR */}
+            <div className={`h-px my-1 ${darkMode ? 'bg-slate-800/50' : 'bg-slate-200'} ${isSidebarCollapsed ? 'w-8' : 'w-full'}`} />
+
+            {/* SECTION 2: SUIVI (PACKING LIST / BREAKDOWN / RECAP / SAUVEGARDES) */}
+            <div className={`flex flex-col gap-1.5 ${isSidebarCollapsed ? 'items-center' : 'w-full'}`}>
+              {!isSidebarCollapsed && (
+                <div className={`px-1 text-[9px] font-mono tracking-wider font-extrabold uppercase mb-1 transition-colors select-none ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  📊 SUIVI & LIVRABLES
+                </div>
+              )}
               
-              <div className={isSidebarCollapsed ? 'flex flex-col gap-2' : 'grid grid-cols-2 lg:grid-cols-1 gap-2 w-full'}>
+              <div className={isSidebarCollapsed ? 'flex flex-col gap-2' : 'flex flex-col gap-1.5 w-full'}>
                 {/* RIBBON 4: PACKING LIST */}
                 <button
                   onClick={() => setActiveInputTab('packing_list')}
@@ -1876,7 +1844,6 @@ export default function App() {
                 </button>
               </div>
             </div>
-            )}
 
           </div>
 
@@ -3083,6 +3050,48 @@ export default function App() {
                           <span>📊 TABLEAU DE BORD DE SYNTHÈSE DES EXPÉDITIONS</span>
                         </div>
 
+                        {/* 📝 RÉFÉRENCES & COORDONNÉES DE LA COMMANDE (DETAILED ORDER INFO) */}
+                        <div className={`mb-6 p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                          <div className={`text-xs font-mono font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5 ${darkMode ? 'text-slate-350' : 'text-slate-700'}`}>
+                            <span className="w-1.5 h-3 bg-blue-500 rounded-sm" />
+                            <span>📝 DÉTAILS DE LA COMMANDE & RÉFÉRENCES</span>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">Client / Customer</span>
+                              <span className={`font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{meta.customer || '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">Commande / Order</span>
+                              <span className={`font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{meta.order || '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">PO# Client</span>
+                              <span className={`font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{meta.po || '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">Réf Client</span>
+                              <span className="text-amber-500 font-bold">{meta.refClient || '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">Style N° / Nom</span>
+                              <span className={`font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{(meta.style || meta.styleNumber) ? `${meta.style || ''} ${meta.styleNumber ? `(#${meta.styleNumber})` : ''}` : '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">Facture / Invoice</span>
+                              <span className={`font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{meta.invoice || '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold">Composition</span>
+                              <span className={`font-semibold ${darkMode ? 'text-slate-300' : 'text-slate-800'}`}>{meta.composition || '—'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block text-[9px] uppercase font-bold text-emerald-500">Destination / Pays</span>
+                              <span className={`font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{meta.destination || meta.pays ? `${meta.destination || ''} ${meta.pays ? `(${meta.pays})` : ''}` : '—'}</span>
+                            </div>
+                          </div>
+                        </div>
+
                         {/* Top Bento Grid of Totals */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                           <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-900/40 border-slate-800/80' : 'bg-slate-50 text-slate-900 border-slate-200'}`}>
@@ -3221,6 +3230,75 @@ export default function App() {
                                 </tr>
                               </tbody>
                             </table>
+                          </div>
+                        </div>
+
+                        {/* 📦 BORDEREAU COMPLET DU PACKING LIST PAR CARTONS */}
+                        <div className="mt-8 border-t border-slate-800 pt-6">
+                          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-350 mb-4 flex items-center justify-between">
+                            <span className="flex items-center gap-2">
+                              <span className="w-1.5 h-3 bg-emerald-500 rounded-sm" />
+                              <span>📦 DÉTAILS COMPLETS DU PACKING LIST PAR CARTONS</span>
+                            </span>
+                          </h3>
+                          <div className="space-y-6">
+                            {activeResults.map((res, ci) => {
+                              const origIdx = res.colorIndex ?? ci;
+                              const activeColorSizes = res.tailles.filter(t => isStandardSizeAlwaysShown(t) || (colors[origIdx]?.sizes[t]?.qtyTot || 0) > 0);
+                              return (
+                                <div key={ci} className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-950/25 border-slate-900/60' : 'bg-slate-50 border-slate-250/60'}`}>
+                                  <div className="flex items-center gap-2 border-b border-dashed border-slate-800/20 pb-2 mb-3 text-xs font-mono font-bold uppercase" style={{ color: res.color }}>
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: res.color }} />
+                                    <span>Couleur: {res.nom} — {res.mode === 'strict_solide' ? '🔒 Solid Pack' : '🔀 Mixed Pack'}</span>
+                                  </div>
+                                  <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900/10">
+                                    <table className="w-full text-xs text-center border-collapse">
+                                      <thead>
+                                        <tr className="bg-slate-900 border-b border-slate-800 font-mono font-bold text-[10px] text-slate-400">
+                                          <th className="py-2 px-1 uppercase text-center border-r border-slate-800">Début</th>
+                                          <th className="py-2 px-1 uppercase text-center border-r border-slate-800">Fin</th>
+                                          {activeColorSizes.map(t => (
+                                            <th key={t} className="px-1.5 border-r border-slate-800 text-[#4f8ef7]">{t}</th>
+                                          ))}
+                                          <th className="px-1.5 border-r border-slate-800">Pcs/Ctn</th>
+                                          <th className="px-1.5 border-r border-slate-800">Nb Ctn</th>
+                                          <th className="px-1.5 border-r border-slate-800">Total Qty</th>
+                                          <th className="px-1.5 border-r border-slate-805 text-teal-400">N.W (KG)</th>
+                                          <th className="px-1.5 text-red-400 font-bold">G.W (KG)</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-slate-800/40 font-mono">
+                                        {res.rows.map((row, rIdx) => (
+                                          <tr key={rIdx} className="hover:bg-slate-800/10 divide-x divide-slate-800/30">
+                                            <td className="py-1.5 px-1 font-bold text-slate-400">{parseCartonRange(row.cartonRange).start}</td>
+                                            <td className="py-1.5 px-1 font-bold text-slate-400">{parseCartonRange(row.cartonRange).end}</td>
+                                            {activeColorSizes.map(t => (
+                                              <td key={t} className="px-1.5 font-semibold">{row.sizes[t] || ''}</td>
+                                            ))}
+                                            <td className="px-1.5 bg-slate-900/10 font-bold">{row.pcsPerCarton}</td>
+                                            <td className="px-1.5 font-bold">{row.nbr}</td>
+                                            <td className="px-1.5 font-bold text-slate-300">{row.totalPcs}</td>
+                                            <td className="px-1.5 text-teal-400 font-semibold">{row.netWeightRow.toFixed(1)}</td>
+                                            <td className="px-1.5 text-red-500 font-semibold">{row.grossWeightRow.toFixed(1)}</td>
+                                          </tr>
+                                        ))}
+                                        <tr className="bg-amber-500/5 text-amber-550 dark:text-amber-400 font-bold border-t border-slate-805 divide-x divide-slate-800">
+                                          <td colSpan={2} className="py-1.5 px-2">Total {res.nom}</td>
+                                          {activeColorSizes.map(t => (
+                                            <td key={t} className="px-1.5 text-slate-400">{res.totals.sizes[t] || 0}</td>
+                                          ))}
+                                          <td>—</td>
+                                          <td className="px-1.5">{res.totals.c} ctns</td>
+                                          <td className="px-1.5 text-amber-600 dark:text-amber-300">{res.totals.p} pcs</td>
+                                          <td className="px-1.5 text-teal-400">{res.totals.n.toFixed(1)} KG</td>
+                                          <td className="px-1.5 text-red-500">{res.totals.g.toFixed(1)} KG</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 

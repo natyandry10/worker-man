@@ -15,6 +15,7 @@ import {
   Upload,
   Info,
   ChevronRight,
+  ChevronLeft,
   Calculator,
   Grid,
   Edit2,
@@ -188,6 +189,32 @@ export default function App() {
   // Active Input Section Tab (separates metadata, strategy, and color sheet editing)
   const [activeInputTab, setActiveInputTab] = useState<'meta' | 'strategy' | 'colors' | 'packing_list' | 'breakdown' | 'summary' | 'saves'>('colors');
 
+  // Active page state for sidebar: 'saisie' (page 1: Saisie & Préparation) or 'suivi' (page 2: Suivi & Livrables)
+  const [sidebarActivePage, setSidebarActivePage] = useState<'saisie' | 'suivi'>('saisie');
+
+  // Controlled wrapper to set active inputs and automatically update the sidebar page grouping
+  const handleSetActiveInputTab = (tab: 'meta' | 'strategy' | 'colors' | 'packing_list' | 'breakdown' | 'summary' | 'saves') => {
+    setActiveInputTab(tab);
+    if (['meta', 'strategy', 'colors'].includes(tab)) {
+      setSidebarActivePage('saisie');
+    } else {
+      setSidebarActivePage('suivi');
+    }
+  };
+
+  const handleSwitchSidebarPage = (page: 'saisie' | 'suivi') => {
+    setSidebarActivePage(page);
+    if (page === 'saisie') {
+      setActiveInputTab('colors');
+    } else {
+      setActiveInputTab('packing_list');
+    }
+  };
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('packing_list_pro_sidebar_collapsed') === 'true';
+  });
+
   // Print checklist parameters
   const [printSections, setPrintSections] = useState({
     hdr: true,
@@ -265,6 +292,11 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('packing_list_pro_current_is_autosave_enabled', String(isAutosaveEnabled));
   }, [isAutosaveEnabled]);
+
+  // Sync isSidebarCollapsed setting
+  useEffect(() => {
+    localStorage.setItem('packing_list_pro_sidebar_collapsed', String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
 
   // Real-time background auto-saver
   useEffect(() => {
@@ -1296,395 +1328,555 @@ export default function App() {
         </div>
       )}
       {/* HEADER & ACTIONS TOP BLOCK (STICKY) */}
-      <div className={`sticky top-0 z-40 print:hidden transition-all duration-300 border-b pb-4 shadow-sm ${
+      <div className={`sticky top-0 z-40 print:hidden transition-all duration-300 border-b pb-1.5 shadow-sm ${
         darkMode ? 'bg-[#0f1117]/95 border-slate-800' : 'bg-[#f0f2f8]/95 border-slate-200'
       } backdrop-blur-md`}>
-        {/* Header bar */}
-        <header className={`max-w-7xl mx-auto px-4 py-3 md:py-4 flex flex-wrap items-center justify-between gap-4 border-b ${darkMode ? 'border-slate-800/60' : 'border-slate-200/60'} mb-3 print:hidden`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#4f8ef7] to-[#9b72f5] rounded-xl flex items-center justify-center shadow-lg shadow-[#4f8ef7]/15">
-              <Package className="w-5 h-5 text-white" />
+        {/* Sleek Top Bar containing GENERATE, Reset, Excel, PDF, SQL Export, SQL Import, Mode toggle */}
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-gradient-to-r from-[#4f8ef7] to-[#9b72f5] rounded-lg flex items-center justify-center shadow-lg shadow-[#4f8ef7]/15">
+              <Package className="w-3.5 h-3.5 text-white" />
             </div>
-            <div>
-              <h1 className={`text-lg font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-800'}`}>Packing List Pro</h1>
-            </div>
+            <span className={`text-xs font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-800'}`}>PL Pro</span>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleGenerateList}
+              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 via-[#4f8ef7] to-[#9b72f5] hover:brightness-110 text-white font-bold rounded-lg text-[11px] transition-all focus:outline-none flex items-center gap-1 cursor-pointer shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <Calculator className="w-3 h-3 text-white" />
+              <span>GÉNÉRER</span>
+            </button>
 
+            {/* Admin / Utility actions moved from floating panel beside GÉNÉRER */}
             <button
               onClick={() => setIsMajBsdOpen(true)}
-              className="px-3.5 py-2 whitespace-nowrap bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
+              className="px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-400 font-semibold rounded-lg text-[11px] transition-all cursor-pointer flex items-center gap-1 hover:scale-[1.02]"
+              title="🗂️ MAJ BSD (Gabarits)"
             >
-              <Database className="w-3.5 h-3.5" />
-              🗂️ MAJ BSD (Gabarits)
+              <Database className="w-3 h-3" />
+              <span className="hidden sm:inline">Gabarits</span>
             </button>
 
             <button
               onClick={() => setIsCapturingScreen(true)}
-              className="px-3.5 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-mono text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
+              className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 text-blue-400 font-semibold rounded-lg text-[11px] transition-all cursor-pointer flex items-center gap-1 hover:scale-[1.02]"
+              title="📸 CAPTURE D'ÉCRAN"
             >
-              <Camera className="w-3.5 h-3.5" />
-              📸 CAPTURE D'ÉCRAN
+              <Camera className="w-3 h-3" />
+              <span className="hidden sm:inline">Capture</span>
             </button>
 
             <button
               onClick={() => setIsAuthenticated(false)}
-              className="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-mono text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
+              className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-500 hover:text-rose-400 font-semibold rounded-lg text-[11px] transition-all cursor-pointer flex items-center gap-1 hover:scale-[1.02]"
+              title="🚪 SE DÉCONNECTER"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              🚪 SE DÉCONNECTER
+              <LogOut className="w-3 h-3" />
+              <span className="hidden sm:inline">Déconnexion</span>
+            </button>
+
+            <div className="h-4 w-px bg-slate-800/60 dark:bg-slate-700/60 mx-0.5" />
+
+            {results.length > 0 && (
+              <button
+                onClick={handleGenerateList}
+                className={`px-3 py-1.5 text-[11px] font-bold rounded-lg border transition-all flex items-center gap-1 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] ${
+                  !hasGenerated
+                    ? 'bg-amber-500 border-amber-400 text-slate-950 font-extrabold animate-pulse shadow-md shadow-amber-500/20'
+                    : 'bg-emerald-500/10 hover:bg-emerald-500/25 border-emerald-500/30 text-emerald-400'
+                }`}
+                title={!hasGenerated ? "Cliquez ici pour recalculer et appliquer vos modifications !" : "Les calculs sont à jour"}
+              >
+                <RefreshCw className={`w-3 h-3 ${!hasGenerated ? 'animate-spin' : ''}`} style={!hasGenerated ? { animationDuration: '2.5s' } : undefined} />
+                <span>{!hasGenerated ? 'REFRESH REQUIS' : 'REFRESH'}</span>
+              </button>
+            )}
+
+            {!showResetConfirm ? (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 hover:text-red-400 font-semibold rounded-lg text-[11px] transition-all cursor-pointer flex items-center gap-1"
+                title="Saisir à zéro"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Réinitialiser</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1 bg-red-500/10 border border-red-500/40 p-0.5 rounded-lg transition-all">
+                <span className="text-[9px] text-red-400 font-bold px-1 uppercase font-mono">OK?</span>
+                <button
+                  onClick={handleResetScreen}
+                  className="px-2 py-0.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded text-[9px] transition-all cursor-pointer"
+                >
+                  Oui
+                </button>
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded text-[9px] transition-all cursor-pointer"
+                >
+                  Non
+                </button>
+              </div>
+            )}
+
+            <div className="h-4 w-px bg-slate-800/60 dark:bg-slate-700/60 mx-0.5" />
+
+            <button
+              onClick={handleExcelExport}
+              className="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-[#34d399] hover:scale-[1.02] cursor-pointer transition-all flex items-center gap-1"
+              title="Exporter vers Microsoft Excel"
+            >
+              <FileSpreadsheet className="w-3 h-3 text-emerald-400" />
+              <span>Excel</span>
             </button>
 
             <button
+              onClick={handleOpenPdfPrintSelector}
+              className="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 hover:scale-[1.02] cursor-pointer transition-all flex items-center gap-1"
+              title="Générer un PDF / Imprimer"
+            >
+              <FileText className="w-3 h-3 text-amber-500" />
+              <span>PDF / Imprimer</span>
+            </button>
+
+            <div className="h-4 w-px bg-slate-800/60 dark:bg-slate-700/60 mx-0.5" />
+
+            <button
+              onClick={handleExportSQL}
+              className="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:scale-[1.02] cursor-pointer transition-all flex items-center gap-1"
+              title="Exporter la base au format SQL"
+            >
+              <Database className="w-3 h-3 text-blue-400" />
+              <span>SQL Export</span>
+            </button>
+
+            <button
+              onClick={() => setIsSqlImportOpen(true)}
+              className="px-2.5 py-1.5 bg-[#1f2430]/90 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-semibold rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+              title="Restaurer à partir d'un fichier SQL"
+            >
+              <Upload className="w-3 h-3 text-slate-300" />
+              <span>SQL Import</span>
+            </button>
+
+            <div className="h-4 w-px bg-slate-800/60 dark:bg-slate-700/60 mx-1" />
+
+            <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
+              className={`p-1.5 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
                 darkMode ? 'border-slate-800 bg-slate-900 text-amber-400 hover:text-white' : 'border-slate-300 bg-white text-slate-600 hover:text-black'
               }`}
+              title={darkMode ? "Mode Clair" : "Mode Sombre"}
             >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
             </button>
-          </div>
-        </header>
-
-        {/* TOP COMPREHENSIVE ACTIONS BAR — ALIGNED RIGHT */}
-        <div className="max-w-7xl mx-auto px-4">
-          <div className={`p-3.5 md:p-4 rounded-xl border flex flex-col md:flex-row items-center justify-between gap-4 transition-all duration-300 ${
-            darkMode ? 'bg-[#0a162f]/95 border-[#1d3461] shadow-[#000000]/50' : 'bg-[#0e2754]/95 border-[#1d4080] text-white shadow-blue-900/20'
-          }`}>
-            
-            {/* Action buttons */}
-
-            {/* Core Buttons & Exports Grouped to the Top-Right */}
-            <div className="flex flex-wrap items-center gap-2 md:justify-end w-full md:w-auto">
-              
-              <button
-                onClick={handleGenerateList}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 via-[#4f8ef7] to-[#9b72f5] hover:brightness-110 text-white font-bold rounded-lg text-xs transition-all focus:outline-none flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99]"
-              >
-                <Calculator className="w-3.5 h-3.5" />
-                <span>GÉNÉRER</span>
-              </button>
-
-              {results.length > 0 && (
-                <button
-                  onClick={handleGenerateList}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] ${
-                    !hasGenerated
-                      ? 'bg-amber-500 border-amber-400 text-slate-950 font-extrabold animate-pulse shadow-md shadow-amber-500/20'
-                      : 'bg-emerald-500/10 hover:bg-emerald-500/25 border-emerald-500/30 text-emerald-400'
-                  }`}
-                  title={!hasGenerated ? "Cliquez ici pour recalculer et appliquer vos modifications !" : "Les calculs sont à jour"}
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${!hasGenerated ? 'animate-spin' : ''}`} style={!hasGenerated ? { animationDuration: '2.5s' } : undefined} />
-                  <span>{!hasGenerated ? 'REFRESH REQUIS' : 'REFRESH'}</span>
-                </button>
-              )}
-
-              {!showResetConfirm ? (
-                <button
-                  onClick={() => setShowResetConfirm(true)}
-                  className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1"
-                  title="Saisir à zéro"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Réinitialiser</span>
-                </button>
-              ) : (
-                <div className="flex items-center gap-1 bg-red-500/10 border border-red-500/40 p-1 rounded-lg transition-all animate-pulse">
-                  <span className="text-[10px] text-red-400 font-bold px-1.5 uppercase font-mono">Confirmer ?</span>
-                  <button
-                    onClick={handleResetScreen}
-                    className="px-2.5 py-1 bg-red-500 hover:bg-red-600 text-white font-bold rounded text-[11px] transition-all cursor-pointer"
-                  >
-                    Oui
-                  </button>
-                  <button
-                    onClick={() => setShowResetConfirm(false)}
-                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded text-[11px] transition-all cursor-pointer"
-                  >
-                    Non
-                  </button>
-                </div>
-              )}
-
-              <div className="h-6 w-px bg-slate-800 mx-1 hidden sm:block" />
-
-              <button
-                onClick={handleExcelExport}
-                className="px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:scale-[1.02] cursor-pointer transition-all flex items-center gap-1.5"
-                title="Exporter vers Microsoft Excel"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                <span>Excel (.xlsx)</span>
-              </button>
-
-              <button
-                onClick={handleOpenPdfPrintSelector}
-                className="px-3 py-2 text-xs font-semibold rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 hover:scale-[1.02] cursor-pointer transition-all flex items-center gap-1.5"
-                title="Générer un PDF / Imprimer"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>PDF / Imprimer</span>
-              </button>
-
-              <div className="h-6 w-px bg-slate-800 mx-1 hidden sm:block" />
-
-              <button
-                onClick={handleExportSQL}
-                className="px-3 py-2 text-xs font-semibold rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:scale-[1.02] cursor-pointer transition-all flex items-center gap-1.5"
-                title="Exporter la base au format SQL"
-              >
-                <Database className="w-3.5 h-3.5" />
-                <span>SQL Export</span>
-              </button>
-
-              <button
-                onClick={() => setIsSqlImportOpen(true)}
-                className="px-3 py-2 bg-[#1f2430] hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-                title="Restaurer à partir d'un fichier SQL"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>SQL Import</span>
-              </button>
-
-            </div>
           </div>
         </div>
       </div>
 
       {/* Main Container workspace */}
-      <main className="max-w-7xl mx-auto px-4 space-y-6 print:px-0 pb-16 pt-6">
+      <main className="max-w-7xl mx-auto px-4 space-y-6 print:px-0 pb-44 pt-6 mb-12">
+
+        {/* Mobile Header indicator explaining menu state */}
+        <div className="lg:hidden flex items-center justify-between w-full p-3 border rounded-xl font-sans text-xs font-bold transition-all print:hidden shadow-xs border-dashed z-30 sticky top-[60px] bg-slate-100/90 dark:bg-slate-900/95 backdrop-blur-md border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#4f8ef7] animate-pulse" />
+            <span className="uppercase tracking-wider font-mono text-[11px]">
+              {
+                activeInputTab === 'meta' ? '📋 RÉFÉRENCES' : 
+                activeInputTab === 'strategy' ? '⚙️ STRATÉGIE' : 
+                activeInputTab === 'colors' ? '⌨️ SAISIE COLISAGE' : 
+                activeInputTab === 'packing_list' ? '📦 PACKING LIST' : 
+                activeInputTab === 'breakdown' ? '📊 BREAKDOWN' : 
+                activeInputTab === 'summary' ? '📈 RECAPITULATIF' : '💾 SAUVEGARDES'
+              }
+            </span>
+          </div>
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="px-2.5 py-1.5 rounded-lg border text-[10px] font-mono font-bold uppercase transition-all bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-[#4f8ef7] cursor-pointer"
+          >
+            {isSidebarCollapsed ? '👁️ Afficher Rubans' : '🙈 Masquer Rubans'}
+          </button>
+        </div>
 
         {/* INPUT PANELS & SIDEBAR NAVIGATION RIBBONS */}
         <div className="flex flex-col lg:flex-row gap-6 print:hidden items-start">
           
           {/* SIDEBAR NAVIGATION: PETITS RUBANS À GAUCHE */}
-          <div className="w-full lg:w-64 flex-shrink-0 flex flex-row lg:flex-col gap-3">
-            
-            {/* RIBBON 1: RÉFÉRENCES */}
-            <button
-              onClick={() => setActiveInputTab('meta')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'meta'
-                  ? darkMode
-                    ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
-                    : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'meta' ? 'bg-blue-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+          <div 
+            className={`flex-shrink-0 transition-all duration-300 ease-in-out self-start z-30 
+              ${isSidebarCollapsed ? 'hidden lg:flex lg:w-20' : 'w-full lg:w-64 flex'} 
+              flex-col gap-2.5 sticky top-[135px] sm:top-[140px] lg:top-[75px] lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none border rounded-2xl p-3 
+              ${darkMode ? 'bg-[#121620] border-slate-800/80' : 'bg-slate-50 border-slate-250/80 shadow-xs'}
+            `}
+          >
+            {/* COLLAPSE/EXPAND TOGGLE HEADER - DESKTOP ONLY */}
+            <div className={`hidden lg:flex items-center justify-between border-b pb-2 ${darkMode ? 'border-slate-800/60' : 'border-slate-200'} ${isSidebarCollapsed ? 'justify-center border-none pb-0' : 'px-1 mb-1'}`}>
+              {!isSidebarCollapsed && (
+                <span className={`text-[10px] font-mono tracking-wider font-extrabold uppercase ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  🧭 Navigation
+                </span>
+              )}
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className={`p-1.5 rounded-lg border hover:scale-[1.05] active:scale-[0.95] cursor-pointer transition-all ${
+                  darkMode
+                    ? 'border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                    : 'border-slate-200 bg-white text-slate-600 hover:text-black hover:bg-slate-100 shadow-xs'
                 }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'meta' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <FileText className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  📋 RÉFÉRENCES
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Commande & Clients
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'meta' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
-            </button>
+                title={isSidebarCollapsed ? "Déployer le panneau" : "Réduire le panneau"}
+              >
+                {isSidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+              </button>
+            </div>
 
-            {/* RIBBON 2: STRATÉGIE */}
-            <button
-              onClick={() => setActiveInputTab('strategy')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'strategy'
-                  ? darkMode
-                    ? 'bg-[#2a231b] border-orange-500/50 text-orange-400 shadow-md shadow-orange-500/10'
-                    : 'bg-white border-orange-500 text-orange-600 shadow-sm shadow-orange-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'strategy' ? 'bg-orange-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+            {/* SEGMENTED PAGE CONTROL (Saisie & réparation vs Suivi & livrable) */}
+            <div className={`p-1 rounded-xl flex gap-1 ${darkMode ? 'bg-slate-900/60' : 'bg-slate-200/50'} ${isSidebarCollapsed ? 'flex-col items-center' : 'w-full mb-2'}`}>
+              <button
+                onClick={() => handleSwitchSidebarPage('saisie')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-1 text-[11px] font-extrabold font-mono tracking-wider rounded-lg transition-all cursor-pointer ${
+                  sidebarActivePage === 'saisie'
+                    ? darkMode
+                      ? 'bg-[#1b263b] text-[#4f8ef7] shadow-sm shadow-[#4f8ef7]/15'
+                      : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm font-extrabold'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/20'
                 }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'strategy' ? 'bg-orange-500/10 text-orange-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <Sliders className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  ⚙️ STRATÉGIE
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Normes d'Emballage
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'strategy' ? 'translate-x-[2px] text-orange-500' : 'text-slate-600'}`} />
-            </button>
+                title="Saisie & Réparation"
+              >
+                <span className="text-xs">✍️</span>
+                {!isSidebarCollapsed && <span className="text-[10px] uppercase">Saisie</span>}
+              </button>
+              <button
+                onClick={() => handleSwitchSidebarPage('suivi')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-1 text-[11px] font-extrabold font-mono tracking-wider rounded-lg transition-all cursor-pointer ${
+                  sidebarActivePage === 'suivi'
+                    ? darkMode
+                      ? 'bg-[#1b3b2b] text-[#34d399] shadow-sm shadow-emerald-500/15'
+                      : 'bg-white border-emerald-500 text-emerald-600 shadow-sm font-extrabold'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/20'
+                }`}
+                title="Suivi & Livrable"
+              >
+                <span className="text-xs">📦</span>
+                {!isSidebarCollapsed && <span className="text-[10px] uppercase">Suivi</span>}
+              </button>
+            </div>
 
-            {/* RIBBON 3: COLISAGE */}
-            <button
-              onClick={() => setActiveInputTab('colors')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'colors'
-                  ? darkMode
-                    ? 'bg-[#231d2c] border-purple-500/50 text-purple-400 shadow-md shadow-purple-500/10'
-                    : 'bg-white border-purple-500 text-purple-600 shadow-sm shadow-purple-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'colors' ? 'bg-purple-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
-                }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'colors' ? 'bg-purple-500/10 text-purple-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <Grid className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  ⌨️ GRILLE SAISIE
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Colisage par Couleur
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'colors' ? 'translate-x-[2px] text-purple-500' : 'text-slate-600'}`} />
-            </button>
+            {/* SECTION 1: SAISIE & CONFIGURATION */}
+            {sidebarActivePage === 'saisie' && (
+              <div className={`flex flex-col gap-1.5 ${isSidebarCollapsed ? 'items-center' : 'w-full'}`}>
+                {!isSidebarCollapsed && (
+                  <div className={`px-1 text-[9px] font-mono tracking-wider font-extrabold uppercase mb-1 transition-colors select-none ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    ✍️ Saisie & Réparation
+                  </div>
+                )}
+              
+              <div className={isSidebarCollapsed ? 'flex flex-col gap-2' : 'grid grid-cols-2 lg:grid-cols-1 gap-2 w-full'}>
+                {/* RIBBON 1: RÉFÉRENCES */}
+                <button
+                  onClick={() => setActiveInputTab('meta')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full'
+                  } ${
+                    activeInputTab === 'meta'
+                      ? darkMode
+                        ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
+                        : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="📋 RÉFÉRENCES : Coordonnées Commande"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'meta' ? 'bg-blue-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'meta' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <FileText className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        📋 RÉFÉRENCES
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Commande & Clients
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'meta' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
+                  )}
+                </button>
 
-            {/* RIBBON 4: PACKING LIST */}
-            <button
-              onClick={() => setActiveInputTab('packing_list')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'packing_list'
-                  ? darkMode
-                    ? 'bg-[#1b3b2b] border-emerald-500/50 text-[#34d399] shadow-md shadow-emerald-500/10'
-                    : 'bg-white border-[#34d399] text-[#34d399] shadow-sm shadow-emerald-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'packing_list' ? 'bg-emerald-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
-                }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'packing_list' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <FileSpreadsheet className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  📦 PACKING LIST
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Fiches de Colisage
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'packing_list' ? 'translate-x-[2px] text-emerald-500' : 'text-slate-600'}`} />
-            </button>
+                {/* RIBBON 2: STRATÉGIE */}
+                <button
+                  onClick={() => setActiveInputTab('strategy')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full'
+                  } ${
+                    activeInputTab === 'strategy'
+                      ? darkMode
+                        ? 'bg-[#2a231b] border-orange-500/50 text-orange-400 shadow-md shadow-orange-500/10'
+                        : 'bg-white border-orange-500 text-orange-600 shadow-sm shadow-orange-500/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="⚙️ STRATÉGIE : Normes d'Emballage"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'strategy' ? 'bg-orange-500 scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'strategy' ? 'bg-orange-500/10 text-orange-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <Sliders className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        ⚙️ STRATÉGIE
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Normes d'Emballage
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'strategy' ? 'translate-x-[2px] text-orange-500' : 'text-slate-600'}`} />
+                  )}
+                </button>
 
-            {/* RIBBON 5: COLOR/SIZE BREAKDOWN */}
-            <button
-              onClick={() => setActiveInputTab('breakdown')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'breakdown'
-                  ? darkMode
-                    ? 'bg-[#3b321b] border-amber-500/50 text-[#fbbf24] shadow-md shadow-amber-500/10 font-bold'
-                    : 'bg-white border-[#fbbf24] text-[#fbbf24] shadow-sm shadow-amber-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'breakdown' ? 'bg-amber-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
-                }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'breakdown' ? 'bg-amber-500/10 text-amber-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <Grid className="w-4 h-4" />
+                {/* RIBBON 3: COLISAGE */}
+                <button
+                  onClick={() => setActiveInputTab('colors')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full col-span-2 lg:col-span-1'
+                  } ${
+                    activeInputTab === 'colors'
+                      ? darkMode
+                        ? 'bg-[#231d2c] border-purple-500/55 text-purple-400 shadow-md shadow-purple-500/10'
+                        : 'bg-white border-purple-500 text-purple-600 shadow-sm shadow-purple-500/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="⌨️ GRILLE SAISIE : Colisage par Couleur"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'colors' ? 'bg-purple-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'colors' ? 'bg-purple-500/10 text-purple-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <Grid className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        ⌨️ GRILLE SAISIE
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Colisage par Couleur
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'colors' ? 'translate-x-[2px] text-purple-500' : 'text-slate-600'}`} />
+                  )}
+                </button>
               </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  📊 BREAKDOWN
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Résumé Couleur/Taille
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'breakdown' ? 'translate-x-[2px] text-amber-500' : 'text-slate-600'}`} />
-            </button>
+            </div>
+            )}
 
-            {/* RIBBON 6: RECAPITULATIF */}
-            <button
-              onClick={() => setActiveInputTab('summary')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'summary'
-                  ? darkMode
-                    ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
-                    : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'summary' ? 'bg-blue-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
-                }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'summary' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <PieChart className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  📈 RECAPITULATIF
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Résumé & Analyses
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'summary' ? 'translate-x-[2px] text-blue-500' : 'text-slate-600'}`} />
-            </button>
+            {/* SECTION 2: EXPLOITATION & DOCUMENTS */}
+            {sidebarActivePage === 'suivi' && (
+              <div className={`flex flex-col gap-1.5 ${isSidebarCollapsed ? 'items-center' : 'w-full'}`}>
+                {!isSidebarCollapsed && (
+                  <div className={`px-1 text-[9px] font-mono tracking-wider font-extrabold uppercase mb-1 transition-colors select-none ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    📦 Suivi & Livrable
+                  </div>
+                )}
+              
+              <div className={isSidebarCollapsed ? 'flex flex-col gap-2' : 'grid grid-cols-2 lg:grid-cols-1 gap-2 w-full'}>
+                {/* RIBBON 4: PACKING LIST */}
+                <button
+                  onClick={() => setActiveInputTab('packing_list')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full'
+                  } ${
+                    activeInputTab === 'packing_list'
+                      ? darkMode
+                        ? 'bg-[#1b3b2b] border-emerald-500/50 text-[#34d399] shadow-md shadow-emerald-500/10'
+                        : 'bg-white border-[#34d399] text-[#34d399] shadow-sm shadow-emerald-500/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="📦 PACKING LIST : Fiches de Colisage"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'packing_list' ? 'bg-emerald-500 scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'packing_list' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        📦 PACKING LIST
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Fiches de Colisage
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'packing_list' ? 'translate-x-[2px] text-emerald-500' : 'text-slate-600'}`} />
+                  )}
+                </button>
 
-            {/* RIBBON 7: SAUVEGARDES */}
-            <button
-              onClick={() => setActiveInputTab('saves')}
-              className={`group flex items-center gap-3 p-3.5 text-left transition-all border rounded-xl relative cursor-pointer hover:scale-[1.01] active:scale-[0.99] overflow-hidden flex-1 lg:flex-initial ${
-                activeInputTab === 'saves'
-                  ? darkMode
-                    ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
-                    : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
-                  : darkMode
-                    ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
-              }`}
-            >
-              <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 transition-transform duration-300 ${
-                  activeInputTab === 'saves' ? 'bg-[#4f8ef7] scale-y-100' : 'bg-slate-500 scale-y-0 group-hover:scale-y-50'
-                }`}
-              />
-              <div className={`p-2 rounded-lg ${activeInputTab === 'saves' ? 'bg-[#4f8ef7]/10 text-[#4f8ef7]' : 'bg-slate-500/5 text-slate-500'} transition-colors ml-1`}>
-                <History className="w-4 h-4" />
+                {/* RIBBON 5: COLOR/SIZE BREAKDOWN */}
+                <button
+                  onClick={() => setActiveInputTab('breakdown')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full'
+                  } ${
+                    activeInputTab === 'breakdown'
+                      ? darkMode
+                        ? 'bg-[#3b321b] border-amber-500/50 text-[#fbbf24] shadow-md shadow-amber-500/10 font-bold'
+                        : 'bg-white border-[#fbbf24] text-[#fbbf24] shadow-sm shadow-amber-500/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white font-normal'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="📊 BREAKDOWN : Résumé Couleur/Taille"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'breakdown' ? 'bg-amber-500 scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'breakdown' ? 'bg-amber-500/10 text-amber-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <Grid className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        📊 BREAKDOWN
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Résumé Couleur/Taille
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'breakdown' ? 'translate-x-[2px] text-amber-500' : 'text-slate-600'}`} />
+                  )}
+                </button>
+
+                {/* RIBBON 6: RECAPITULATIF */}
+                <button
+                  onClick={() => setActiveInputTab('summary')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full'
+                  } ${
+                    activeInputTab === 'summary'
+                      ? darkMode
+                        ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
+                        : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-blue-500/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="📈 RECAPITULATIF : Résumé & Analyses"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'summary' ? 'bg-blue-500 scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'summary' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <PieChart className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        📈 RECAP
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Résumé & Analyses
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'summary' ? 'translate-x-[2px] text-blue-500' : 'text-slate-600'}`} />
+                  )}
+                </button>
+
+                {/* RIBBON 7: SAUVEGARDES */}
+                <button
+                  onClick={() => setActiveInputTab('saves')}
+                  className={`group flex items-center gap-3 transition-all border rounded-xl relative cursor-pointer hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+                    isSidebarCollapsed 
+                      ? 'lg:w-12 lg:h-12 lg:justify-center p-0 lg:p-2' 
+                      : 'p-2.5 text-left w-full'
+                  } ${
+                    activeInputTab === 'saves'
+                      ? darkMode
+                        ? 'bg-[#1b263b] border-blue-500/50 text-[#4f8ef7] shadow-md shadow-blue-500/10'
+                        : 'bg-white border-[#4f8ef7] text-[#4f8ef7] shadow-sm shadow-[#4f8ef7]/10 font-bold'
+                      : darkMode
+                        ? 'bg-[#161a23] border-slate-800 text-slate-400 hover:text-white'
+                        : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
+                  }`}
+                  title="💾 SAUVEGARDES : Sauvegarde & Historique"
+                >
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 transition-transform duration-300 ${
+                      activeInputTab === 'saves' ? 'bg-[#4f8ef7] scale-y-100' : 'bg-slate-50 scale-y-0 group-hover:scale-y-50'
+                    }`}
+                  />
+                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${activeInputTab === 'saves' ? 'bg-[#4f8ef7]/10 text-[#4f8ef7]' : 'bg-slate-500/5 text-slate-500'} transition-colors ${isSidebarCollapsed ? 'ml-0' : 'ml-0.5'}`}>
+                    <History className="w-3.5 h-3.5" />
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 min-w-0 pr-1 select-none">
+                      <div className="text-[10px] font-mono tracking-wider font-extrabold uppercase truncate">
+                        💾 SAUVEGARDES
+                      </div>
+                      <div className={`text-[9px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Sauvegarde & Historique
+                      </div>
+                    </div>
+                  )}
+                  {!isSidebarCollapsed && (
+                    <ChevronRight className={`w-3 h-3 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'saves' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
+                  )}
+                </button>
               </div>
-              <div className="flex-1 min-w-0 pr-1 select-none">
-                <div className="text-[11px] font-mono tracking-wider font-extrabold uppercase truncate">
-                  💾 SAUVEGARDES
-                </div>
-                <div className={`text-[10px] hidden lg:block mt-0.5 font-sans truncate ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Sauvegarde & Historique
-                </div>
-              </div>
-              <ChevronRight className={`w-3.5 h-3.5 ml-auto hidden lg:block transition-all duration-200 ${activeInputTab === 'saves' ? 'translate-x-[2px] text-[#4f8ef7]' : 'text-slate-600'}`} />
-            </button>
+            </div>
+            )}
 
           </div>
 
@@ -3244,9 +3436,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* CALCULATION RESULTS DISPLAY PANELS */}
-        {hasGenerated && activeInputTab !== 'packing_list' && activeInputTab !== 'breakdown' && activeInputTab !== 'saves' && (
-          <div className="space-y-6 animate-fadeIn">
+        {/* CALCULATION RESULTS DISPLAY PANELS (RENDERED EXCLUSIVELY FOR PRINT VIEW AND HIDDEN ON-SCREEN TO PREVENT TAB CLUTTER) */}
+        {hasGenerated && (
+          <div className="hidden print:block print:space-y-6">
             
             {/* PRINT INDIVIDUAL COLOR PACKS */}
             {printSections.ind && activeResults.map((res, ci) => {

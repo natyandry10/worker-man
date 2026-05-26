@@ -76,7 +76,7 @@ export default function WelcomeScreen({ onSuccess }: WelcomeScreenProps) {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
           className="text-2xl font-black font-sans text-white tracking-tight"
         >
-          PL PRO <span className="text-[#ff5000]">ENTERPRISE</span>
+          Andry <span className="text-[#ff5000]">Nantenaina</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, letterSpacing: "0.05em" }}
@@ -84,7 +84,7 @@ export default function WelcomeScreen({ onSuccess }: WelcomeScreenProps) {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.45 }}
           className="text-xs font-mono text-slate-400 mt-1 mb-8 uppercase tracking-widest"
         >
-          ALIBABA & AMAZON LOGISTICS PARTNER SYSTEM
+          LOGISTIQUE OFFICER
         </motion.p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

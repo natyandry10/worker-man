@@ -1338,8 +1338,8 @@ export default function App() {
               <Package className="w-4 h-4 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className={`text-xs font-black tracking-wider uppercase font-sans ${darkMode ? 'text-white' : 'text-slate-900'}`}>PL PRO <span className="text-[#ff5000]">ENTERPRISE</span></span>
-              <span className="text-[8px] font-mono tracking-widest text-[#94a3b8] -mt-0.5 uppercase">Alibaba & Amazon Compliant</span>
+              <span className={`text-xs font-black tracking-wider uppercase font-sans ${darkMode ? 'text-white' : 'text-slate-900'}`}>Andry <span className="text-[#ff5000]">Nantenaina</span></span>
+              <span className="text-[8px] font-mono tracking-widest text-[#94a3b8] -mt-0.5 uppercase">Logistique officer</span>
             </div>
           </div>
 
@@ -2547,8 +2547,8 @@ export default function App() {
                               onChange={(e) => handleUpdateSizeCell(sz, 'cap', e.target.value)}
                               className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
                                 darkMode
-                                  ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-306'
-                                  : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-750 hover:border-slate-300'
+                                  ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-300'
+                                  : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-600 hover:border-slate-300'
                               }`}
                               placeholder="25"
                             />
@@ -3057,7 +3057,7 @@ export default function App() {
                         <div className={`mb-6 p-4 rounded-xl border ${darkMode ? 'bg-slate-900/30 border-slate-800/60' : 'bg-[#fcfdfe] border-slate-200 shadow-xs'}`}>
                           <div className={`text-xs font-sans font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>
                             <span className="w-1.5 h-3.5 bg-[#ff5000] rounded-sm" />
-                            <span>📝 DÉTAILS DE LA COMMANDE & RÉFÉRENCES (ALIBABA-AMAZON SHEET)</span>
+                            <span>📝 DÉTAILS DE LA COMMANDE & RÉFÉRENCES (FICHE LOGISTIQUE)</span>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
                             <div>

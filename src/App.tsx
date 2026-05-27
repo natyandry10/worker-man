@@ -2792,18 +2792,18 @@ export default function App() {
                               </th>
                             </tr>
                           </thead>
-                          <tbody className={`divide-y font-mono font-semibold text-slate-300 ${darkMode ? 'divide-slate-800' : 'divide-slate-200'}`}>
+                          <tbody className={`divide-y font-mono font-semibold ${darkMode ? 'divide-slate-800 text-slate-300' : 'divide-slate-200 text-slate-800'}`}>
                             {/* Line 1: QTY PCS TOTALE */}
                             <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
                               <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
-                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-800'
                               }`}>
                                 QTY PCS TOTALE
                               </td>
                               {activeColorConfig.tailles.map((sz) => {
                                 const qTot = activeColorConfig.sizes[sz]?.qtyTot || 0;
                                 return (
-                                  <td key={sz} className={`p-2 border-r font-black text-xs ${darkMode ? 'border-slate-800 text-slate-100' : 'border-slate-200 text-slate-805'}`}>
+                                  <td key={sz} className={`p-2 border-r font-black text-xs ${darkMode ? 'border-slate-800 text-slate-100' : 'border-slate-200 text-slate-800'}`}>
                                     {qTot}
                                   </td>
                                 );
@@ -2814,7 +2814,7 @@ export default function App() {
                             {/* Line 2: QTY PCS PAR CARTON */}
                             <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
                               <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
-                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-800'
                               }`}>
                                 QTY PCS PAR CARTON
                               </td>
@@ -2826,13 +2826,13 @@ export default function App() {
                                   </td>
                                 );
                               })}
-                              <td className="p-2 font-medium text-slate-500 dark:text-slate-405 font-mono">—</td>
+                              <td className="p-2 font-medium text-slate-500 dark:text-slate-400 font-mono">—</td>
                             </tr>
 
                             {/* Line 3: QTY CARTON FULL */}
                             <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
                               <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
-                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-800'
                               }`}>
                                 QTY CARTON FULL
                               </td>
@@ -2841,7 +2841,7 @@ export default function App() {
                                 const c = activeColorConfig.sizes[sz]?.cap || 0;
                                 const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
                                 return (
-                                  <td key={sz} className={`p-2 border-r font-semibold ${darkMode ? 'border-slate-800 text-slate-200' : 'border-slate-200 text-slate-605'}`}>
+                                  <td key={sz} className={`p-2 border-r font-semibold ${darkMode ? 'border-slate-800 text-slate-200' : 'border-slate-200 text-slate-700'}`}>
                                     {fullCtn}
                                   </td>
                                 );
@@ -2852,7 +2852,7 @@ export default function App() {
                             {/* Line 4: QTY PCS FULL TOTALE */}
                             <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
                               <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
-                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-800'
                               }`}>
                                 QTY PCS FULL (TOTAL PACKÉ)
                               </td>
@@ -2862,7 +2862,7 @@ export default function App() {
                                 const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
                                 const fullPcs = fullCtn * c;
                                 return (
-                                  <td key={sz} className={`p-2 border-r font-medium ${darkMode ? 'border-slate-800 text-slate-300' : 'border-slate-200 text-slate-605'}`}>
+                                  <td key={sz} className={`p-2 border-r font-medium ${darkMode ? 'border-slate-800 text-slate-300' : 'border-slate-200 text-slate-700'}`}>
                                     {fullPcs}
                                   </td>
                                 );
@@ -2872,8 +2872,8 @@ export default function App() {
 
                             {/* Line 5: QTY PCS LAST */}
                             <tr className={darkMode ? 'bg-[#ff5000]/5 hover:bg-[#ff5000]/10' : 'bg-amber-500/5 hover:bg-amber-500/10'}>
-                              <td className={`py-2.5 px-4 text-left font-sans font-black border-r text-red-650 dark:text-orange-400 ${
-                                darkMode ? 'border-slate-800 bg-slate-950/20' : 'border-slate-200 bg-slate-150/40'
+                              <td className={`py-2.5 px-4 text-left font-sans font-black border-r text-red-655 dark:text-orange-400 ${
+                                darkMode ? 'border-slate-800 bg-slate-950/20' : 'border-slate-200 bg-slate-100/20'
                               }`}>
                                 QTY PCS LAST (RESTE)
                               </td>
@@ -2901,7 +2901,7 @@ export default function App() {
                                 }
                                 
                                 return (
-                                  <td key={sz} className={`p-2 border-r font-mono font-black ${darkMode ? 'border-slate-800 text-slate-100' : 'border-slate-200 text-slate-805'}`} style={cellStyle}>
+                                  <td key={sz} className={`p-2 border-r font-mono font-black ${darkMode ? 'border-slate-800 text-slate-100' : 'border-slate-200 text-slate-800'}`} style={cellStyle}>
                                     {lastPcs}
                                   </td>
                                 );
@@ -2937,8 +2937,8 @@ export default function App() {
                         <FileSpreadsheet className="w-6 h-6 animate-pulse" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-sm font-bold font-mono text-white uppercase">Packing List non générée</h3>
-                        <p className="text-xs text-slate-405 max-w-md mx-auto">
+                        <h3 className={`text-sm font-bold font-mono uppercase ${darkMode ? 'text-white' : 'text-slate-800'}`}>Packing List non générée</h3>
+                        <p className={`text-xs max-w-md mx-auto ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                           Veuillez saisir vos grilles de colisage dans l'onglet <b>⌨️ GRILLE SAISIE</b>, puis cliquez sur le bouton ci-dessous pour lancer la génération de la Packing List.
                         </p>
                       </div>
@@ -3135,7 +3135,7 @@ export default function App() {
                         <div className={`rounded-xl border p-5 print-cpl-card break-inside-avoid shadow-sm ${
                           darkMode ? 'bg-[#161a23] border-slate-805' : 'bg-white border-slate-200'
                         }`}>
-                          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 font-bold px-4 py-3 rounded-lg flex items-center gap-3 text-white font-mono text-sm mb-4">
+                          <div className={`bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 font-bold px-4 py-3 rounded-lg flex items-center gap-3 font-mono text-sm mb-4 ${darkMode ? 'text-white' : 'text-[#4f8ef7]'}`}>
                             📁 COMBINED PACKING LIST — LEDGER GLOBAL TOUTES COULEURS ({activeResults.length})
                           </div>
 
@@ -3251,8 +3251,8 @@ export default function App() {
                         <Grid className="w-6 h-6 animate-pulse" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-sm font-bold font-mono text-white uppercase">Breakdown non généré</h3>
-                        <p className="text-xs text-slate-405 max-w-md mx-auto">
+                        <h3 className={`text-sm font-bold font-mono uppercase ${darkMode ? 'text-white' : 'text-slate-800'}`}>Breakdown non généré</h3>
+                        <p className={`text-xs max-w-md mx-auto ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                           Veuillez saisir vos grilles de colisage dans l'onglet <b>⌨️ GRILLE SAISIE</b>, puis cliquez sur le bouton ci-dessous pour calculer le Breakdown résumé.
                         </p>
                       </div>
@@ -3343,8 +3343,8 @@ export default function App() {
                         <PieChart className="w-6 h-6 animate-pulse" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-sm font-bold font-mono text-white uppercase">Récapitulatif non généré</h3>
-                        <p className="text-xs text-slate-405 max-w-md mx-auto">
+                        <h3 className={`text-sm font-bold font-mono uppercase ${darkMode ? 'text-white' : 'text-slate-800'}`}>Récapitulatif non généré</h3>
+                        <p className={`text-xs max-w-md mx-auto ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                           Veuillez saisir vos grilles de colisage dans l'onglet <b>⌨️ GRILLE SAISIE</b>, puis cliquez sur le bouton ci-dessous pour calculer le tableau de synthèse et les analyses.
                         </p>
                       </div>
@@ -3566,41 +3566,49 @@ export default function App() {
                                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: res.color }} />
                                     <span>Couleur: {res.nom} — {res.mode === 'strict_solide' ? '🔒 Solid Pack' : '🔀 Mixed Pack'}</span>
                                   </div>
-                                  <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900/10">
+                                  <div className={`overflow-x-auto rounded-lg border ${
+                                    darkMode ? 'border-slate-800 bg-slate-900/10' : 'border-slate-200 bg-slate-100/10'
+                                  }`}>
                                     <table className="w-full text-xs text-center border-collapse">
                                       <thead>
-                                        <tr className="bg-slate-900 border-b border-slate-800 font-mono font-bold text-[10px] text-slate-400">
-                                          <th className="py-2 px-1 uppercase text-center border-r border-slate-800">Début</th>
-                                          <th className="py-2 px-1 uppercase text-center border-r border-slate-800">Fin</th>
+                                        <tr className={`border-b font-mono font-bold text-[10px] ${
+                                          darkMode ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-750'
+                                        }`}>
+                                          <th className={`py-2 px-1 uppercase text-center border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>Début</th>
+                                          <th className={`py-2 px-1 uppercase text-center border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>Fin</th>
                                           {activeColorSizes.map(t => (
-                                            <th key={t} className="px-1.5 border-r border-slate-800 text-[#4f8ef7]">{t}</th>
+                                            <th key={t} className={`px-1.5 border-r text-[#4f8ef7] ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>{t}</th>
                                           ))}
-                                          <th className="px-1.5 border-r border-slate-800">Pcs/Ctn</th>
-                                          <th className="px-1.5 border-r border-slate-800">Nb Ctn</th>
-                                          <th className="px-1.5 border-r border-slate-800">Total Qty</th>
-                                          <th className="px-1.5 border-r border-slate-805 text-teal-400">N.W (KG)</th>
+                                          <th className={`px-1.5 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>Pcs/Ctn</th>
+                                          <th className={`px-1.5 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>Nb Ctn</th>
+                                          <th className={`px-1.5 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>Total Qty</th>
+                                          <th className={`px-1.5 border-r text-teal-400 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N.W (KG)</th>
                                           <th className="px-1.5 text-red-400 font-bold">G.W (KG)</th>
                                         </tr>
                                       </thead>
-                                      <tbody className="divide-y divide-slate-800/40 font-mono">
+                                      <tbody className={`divide-y font-mono ${darkMode ? 'divide-slate-800/40' : 'divide-slate-200'}`}>
                                         {res.rows.map((row, rIdx) => (
-                                          <tr key={rIdx} className="hover:bg-slate-800/10 divide-x divide-slate-800/30">
-                                            <td className="py-1.5 px-1 font-bold text-slate-400">{parseCartonRange(row.cartonRange).start}</td>
-                                            <td className="py-1.5 px-1 font-bold text-slate-400">{parseCartonRange(row.cartonRange).end}</td>
+                                          <tr key={rIdx} className={`hover:bg-slate-800/10 divide-x ${darkMode ? 'divide-slate-800/30' : 'divide-slate-200'}`}>
+                                            <td className={`py-1.5 px-1 font-bold ${darkMode ? 'text-slate-400' : 'text-slate-800'}`}>{parseCartonRange(row.cartonRange).start}</td>
+                                            <td className={`py-1.5 px-1 font-bold ${darkMode ? 'text-slate-400' : 'text-slate-800'}`}>{parseCartonRange(row.cartonRange).end}</td>
                                             {activeColorSizes.map(t => (
-                                              <td key={t} className="px-1.5 font-semibold">{row.sizes[t] || ''}</td>
+                                              <td key={t} className={`px-1.5 font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{row.sizes[t] || ''}</td>
                                             ))}
-                                            <td className="px-1.5 bg-slate-900/10 font-bold">{row.pcsPerCarton}</td>
-                                            <td className="px-1.5 font-bold">{row.nbr}</td>
-                                            <td className="px-1.5 font-bold text-slate-300">{row.totalPcs}</td>
+                                            <td className={`px-1.5 font-bold ${darkMode ? 'bg-slate-900/10 text-slate-200' : 'bg-slate-100/40 text-slate-800'}`}>{row.pcsPerCarton}</td>
+                                            <td className={`px-1.5 font-bold ${darkMode ? 'text-slate-200' : 'text-slate-900'}`}>{row.nbr}</td>
+                                            <td className={`px-1.5 font-bold ${darkMode ? 'text-slate-300' : 'text-slate-950'}`}>{row.totalPcs}</td>
                                             <td className="px-1.5 text-teal-400 font-semibold">{row.netWeightRow.toFixed(1)}</td>
                                             <td className="px-1.5 text-red-500 font-semibold">{row.grossWeightRow.toFixed(1)}</td>
                                           </tr>
                                         ))}
-                                        <tr className="bg-amber-500/5 text-amber-550 dark:text-amber-400 font-bold border-t border-slate-805 divide-x divide-slate-800">
+                                        <tr className={`font-bold border-t divide-x ${
+                                          darkMode 
+                                            ? 'bg-amber-500/5 text-amber-400 border-slate-800 divide-slate-800' 
+                                            : 'bg-amber-500/5 text-amber-850 border-slate-200 divide-slate-200'
+                                        }`}>
                                           <td colSpan={2} className="py-1.5 px-2">Total {res.nom}</td>
                                           {activeColorSizes.map(t => (
-                                            <td key={t} className="px-1.5 text-slate-400">{res.totals.sizes[t] || 0}</td>
+                                            <td key={t} className={darkMode ? 'text-slate-400' : 'text-slate-700'}>{res.totals.sizes[t] || 0}</td>
                                           ))}
                                           <td>—</td>
                                           <td className="px-1.5">{res.totals.c} ctns</td>
@@ -3867,14 +3875,14 @@ export default function App() {
 
                   {/* Print metadata row */}
                   {printSections.meta && (
-                    <div className="flex flex-wrap gap-4 text-[11px] font-mono text-slate-400 pb-4">
-                      <span>COMMANDE: <b className="text-white">{meta.order || '—'}</b></span>
-                      <span>CLIENT: <b className="text-white">{meta.customer || '—'}</b></span>
-                      {meta.po && <span>PO: <b className="text-white">{meta.po}</b></span>}
-                      {meta.invoice && <span>INV: <b className="text-white">{meta.invoice}</b></span>}
-                      {meta.style && <span>STYLE: <b className="text-white">{meta.style}</b></span>}
-                      {meta.destination && <span>DESTINATION: <b className="text-white">{meta.destination}</b></span>}
-                      {meta.portDepart && <span>PORTS: <b className="text-white">{meta.portDepart} → {meta.portArrivee}</b></span>}
+                    <div className={`flex flex-wrap gap-4 text-[11px] font-mono pb-4 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                      <span>COMMANDE: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.order || '—'}</b></span>
+                      <span>CLIENT: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.customer || '—'}</b></span>
+                      {meta.po && <span>PO: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.po}</b></span>}
+                      {meta.invoice && <span>INV: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.invoice}</b></span>}
+                      {meta.style && <span>STYLE: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.style}</b></span>}
+                      {meta.destination && <span>DESTINATION: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.destination}</b></span>}
+                      {meta.portDepart && <span>PORTS: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.portDepart} → {meta.portArrivee}</b></span>}
                     </div>
                   )}
 
@@ -3892,60 +3900,64 @@ export default function App() {
                   </div>
 
                   {/* Grid layout */}
-                  <div className="overflow-x-auto rounded-lg border border-slate-855 bg-slate-900/10">
+                  <div className={`overflow-x-auto rounded-lg border ${
+                    darkMode ? 'border-slate-800 bg-slate-900/10' : 'border-slate-200 bg-slate-100/10'
+                  }`}>
                     <table className="w-full text-xs text-center border-collapse">
                       <thead>
-                        <tr className="bg-slate-900 border-b border-slate-800 font-mono font-bold text-[10px] text-slate-400">
+                        <tr className={`border-b font-mono font-bold text-[10px] ${
+                          darkMode ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-700'
+                        }`}>
                           {printColumns.ctn && (
                             <>
-                              <th className="py-2.5 px-2 uppercase text-center border-r border-slate-800 col-ctn-index">N° DÉBUT</th>
-                              <th className="py-2.5 px-2 uppercase text-center border-r border-slate-800 col-ctn-index">N° FIN</th>
+                              <th className={`py-2.5 px-2 uppercase text-center col-ctn-index border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N° DÉBUT</th>
+                              <th className={`py-2.5 px-2 uppercase text-center col-ctn-index border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N° FIN</th>
                             </>
                           )}
-                          {printColumns.color && <th className="px-2 border-r border-slate-800 col-color-lbl">COULEUR</th>}
+                          {printColumns.color && <th className={`px-2 col-color-lbl border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>COULEUR</th>}
                           {(() => {
                             const origColor = colors.find(c => c.nom === res.nom);
                             const showSkuCol = printColumns.sku && !!(origColor && Object.values(origColor.sizes || {}).some((s: any) => s.sku && String(s.sku).trim() !== ''));
-                            return showSkuCol && <th className="px-3 border-r border-slate-800 col-sku-lbl bg-emerald-500/5 text-emerald-404">SKU</th>;
+                            return showSkuCol && <th className={`px-3 col-sku-lbl bg-emerald-500/5 text-emerald-400 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>SKU</th>;
                           })()}
                           {printColumns.sizes && activeColorSizes.map(t => (
-                            <th key={t} className="px-2 border-r border-slate-800 bg-blue-505/5 text-[#4f8ef7] col-sizes-cells">{t}</th>
+                            <th key={t} className={`px-2 col-sizes-cells border-r bg-blue-500/5 text-[#4f8ef7] ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>{t}</th>
                           ))}
-                          <th className="px-2 border-r border-slate-800">PCS/CTN</th>
-                          {printColumns.nbctn && <th className="px-2 border-r border-slate-800 col-nbctn-metric">NB CTN</th>}
-                          {printColumns.totalqty && <th className="px-2 border-r border-slate-800 col-totalqty-metric">TOTAL QTY</th>}
-                          {printColumns.net && <th className="px-2 border-r border-slate-800 text-teal-400 col-net-metric">N.W (KG)</th>}
-                          {printColumns.gross && <th className="px-2 border-r border-slate-800 text-red-400 col-gross-metric">G.W (KG)</th>}
+                          <th className={`px-2 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>PCS/CTN</th>
+                          {printColumns.nbctn && <th className={`px-2 col-nbctn-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>NB CTN</th>}
+                          {printColumns.totalqty && <th className={`px-2 col-totalqty-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>TOTAL QTY</th>}
+                          {printColumns.net && <th className={`px-2 text-teal-400 col-net-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N.W (KG)</th>}
+                          {printColumns.gross && <th className={`px-2 text-red-400 col-gross-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>G.W (KG)</th>}
                           {printColumns.cbm && <th className="px-2 col-cbm-metric">CBM (m³)</th>}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60 font-mono font-medium">
+                      <tbody className={`divide-y font-mono font-medium ${darkMode ? 'divide-slate-800/60' : 'divide-slate-200'}`}>
                         {res.rows.map((row, rIdx) => {
                           const origColor = colors.find(c => c.nom === res.nom);
                           const showSkuCol = printColumns.sku && !!(origColor && Object.values(origColor.sizes || {}).some((s: any) => s.sku && String(s.sku).trim() !== ''));
                           return (
-                            <tr key={rIdx} className="hover:bg-slate-800/40 divide-x divide-slate-800/40">
+                            <tr key={rIdx} className={`hover:bg-slate-800/40 divide-x ${darkMode ? 'divide-slate-800/40' : 'divide-slate-200'}`}>
                               {printColumns.ctn && (
                                 <>
-                                  <td className="py-2 px-2 text-center font-bold text-slate-350 col-ctn-index">
+                                  <td className={`py-2 px-2 text-center font-bold col-ctn-index ${darkMode ? 'text-slate-300' : 'text-slate-900'}`}>
                                     {parseCartonRange(row.cartonRange).start}
                                   </td>
-                                  <td className="py-2 px-2 text-center font-bold text-slate-350 col-ctn-index">
+                                  <td className={`py-2 px-2 text-center font-bold col-ctn-index ${darkMode ? 'text-slate-300' : 'text-slate-900'}`}>
                                     {parseCartonRange(row.cartonRange).end}
                                   </td>
                                 </>
                               )}
                               {printColumns.color && <td className="px-2 font-bold col-color-lbl" style={{ color: res.color }}>{res.nom}</td>}
-                              {showSkuCol && <td className="px-3 truncate max-w-28 text-[11px] text-emerald-444 font-semibold col-sku-lbl">{row.skus.join('/') || '—'}</td>}
+                              {showSkuCol && <td className="px-3 truncate max-w-28 text-[11px] text-emerald-500 font-semibold col-sku-lbl">{row.skus.join('/') || '—'}</td>}
                               {printColumns.sizes && activeColorSizes.map(t => (
-                                <td key={t} className="px-2 font-bold col-sizes-cells">{row.sizes[t] || ''}</td>
+                                <td key={t} className={`px-2 font-bold col-sizes-cells ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{row.sizes[t] || ''}</td>
                               ))}
-                              <td className="px-2 font-bold bg-slate-900/10">{row.pcsPerCarton}</td>
-                              {printColumns.nbctn && <td className="px-2 font-black col-nbctn-metric">{row.nbr}</td>}
-                              {printColumns.totalqty && <td className="px-2 font-black bg-slate-900/15 text-slate-100 col-totalqty-metric">{row.totalPcs}</td>}
+                              <td className={`px-2 font-bold bg-slate-900/10 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{row.pcsPerCarton}</td>
+                              {printColumns.nbctn && <td className={`px-2 font-black col-nbctn-metric ${darkMode ? 'text-slate-100' : 'text-slate-950'}`}>{row.nbr}</td>}
+                              {printColumns.totalqty && <td className={`px-2 font-black bg-slate-900/15 col-totalqty-metric ${darkMode ? 'text-slate-100' : 'text-slate-950'}`}>{row.totalPcs}</td>}
                               {printColumns.net && <td className="px-2 font-bold text-teal-400 col-net-metric">{row.netWeightRow.toFixed(2)}</td>}
-                              {printColumns.gross && <td className="px-2 font-bold text-red-400 col-gross-metric">{row.grossWeightRow.toFixed(2)}</td>}
-                              {printColumns.cbm && <td className="px-2 text-slate-400 col-cbm-metric">{row.cbmRow.toFixed(4)}</td>}
+                              {printColumns.gross && <td className={`px-2 font-bold col-gross-metric ${darkMode ? 'text-red-300' : 'text-red-650'}`}>{row.grossWeightRow.toFixed(2)}</td>}
+                              {printColumns.cbm && <td className={`px-2 col-cbm-metric ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{row.cbmRow.toFixed(4)}</td>}
                             </tr>
                           );
                         })}
@@ -4016,18 +4028,18 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 font-bold px-4 py-3 rounded-lg flex items-center gap-3 text-white font-mono text-sm mb-4">
+                <div className={`bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-2 border-blue-500/30 font-bold px-4 py-3 rounded-lg flex items-center gap-3 font-mono text-sm mb-4 ${darkMode ? 'text-white' : 'text-[#4f8ef7]'}`}>
                   📁 COMBINED PACKING LIST — LEDGER GLOBAL TOUTES COULEURS ({results.length})
                 </div>
 
                 {printSections.meta && (
-                  <div className="flex flex-wrap gap-4 text-[11px] font-mono text-slate-400 pb-4">
-                    <span>COMMANDE: <b className="text-white">{meta.order || '—'}</b></span>
-                    <span>CLIENT: <b className="text-white">{meta.customer || '—'}</b></span>
-                    {meta.po && <span>PO: <b className="text-white">{meta.po}</b></span>}
-                    {meta.destination && <span>DESTINATION: <b className="text-white">{meta.destination}</b></span>}
-                    <span>CARTONS TOTAL: <b className="text-white">{grandTotals.c}</b></span>
-                    <span>QTE TOUTE: <b className="text-slate-200">{grandTotals.p.toLocaleString('fr-FR')} PCS</b></span>
+                  <div className={`flex flex-wrap gap-4 text-[11px] font-mono pb-4 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <span>COMMANDE: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.order || '—'}</b></span>
+                    <span>CLIENT: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.customer || '—'}</b></span>
+                    {meta.po && <span>PO: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.po}</b></span>}
+                    {meta.destination && <span>DESTINATION: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{meta.destination}</b></span>}
+                    <span>CARTONS TOTAL: <b className={darkMode ? 'text-white' : 'text-slate-900'}>{grandTotals.c}</b></span>
+                    <span>QTE TOUTE: <b className={darkMode ? 'text-slate-200' : 'text-slate-900'}>{grandTotals.p.toLocaleString('fr-FR')} PCS</b></span>
                   </div>
                 )}
 
@@ -4044,29 +4056,33 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="overflow-x-auto rounded-lg border border-slate-850 bg-slate-900/10">
+                <div className={`overflow-x-auto rounded-lg border ${
+                  darkMode ? 'border-slate-800 bg-slate-900/10' : 'border-slate-200 bg-slate-100/10'
+                }`}>
                   <table className="w-full text-xs text-center border-collapse">
                     <thead>
-                      <tr className="bg-slate-900 border-b border-slate-800 font-mono font-bold text-[10px] text-slate-400">
+                      <tr className={`border-b font-mono font-bold text-[10px] ${
+                        darkMode ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-700'
+                      }`}>
                         {printColumns.ctn && (
                           <>
-                            <th className="py-2.5 px-2 uppercase text-center border-r border-slate-800 col-ctn-index">N° DÉBUT</th>
-                            <th className="py-2.5 px-2 uppercase text-center border-r border-slate-800 col-ctn-index">N° FIN</th>
+                            <th className={`py-2.5 px-2 uppercase text-center col-ctn-index border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N° DÉBUT</th>
+                            <th className={`py-2.5 px-2 uppercase text-center col-ctn-index border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N° FIN</th>
                           </>
                         )}
-                        {printColumns.color && <th className="px-2 border-r border-slate-800 col-color-lbl">COULEUR</th>}
+                        {printColumns.color && <th className={`px-2 col-color-lbl border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>COULEUR</th>}
                         {(() => {
                           const showSkuColCombined = printColumns.sku && colors.some(col => Object.values(col.sizes || {}).some((s: any) => s.sku && String(s.sku).trim() !== ''));
-                          return showSkuColCombined && <th className="px-3 border-r border-slate-800 bg-emerald-500/5 text-emerald-405 col-sku-lbl">SKU</th>;
+                          return showSkuColCombined && <th className={`px-3 col-sku-lbl bg-emerald-500/5 text-emerald-400 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>SKU</th>;
                         })()}
                         {printColumns.sizes && summaryUniqueSizes.map(t => (
-                          <th key={t} className="px-2 border-r border-slate-800 bg-blue-505/5 text-[#4f8ef7] col-sizes-cells">{t}</th>
+                          <th key={t} className={`px-2 col-sizes-cells border-r bg-blue-500/5 text-[#4f8ef7] ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>{t}</th>
                         ))}
-                        <th className="px-2 border-r border-slate-800">PCS/CTN</th>
-                        {printColumns.nbctn && <th className="px-2 border-r border-slate-800 col-nbctn-metric">NB CTN</th>}
-                        {printColumns.totalqty && <th className="px-2 border-r border-slate-800 col-totalqty-metric">TOTAL QTY</th>}
-                        {printColumns.net && <th className="px-2 border-r border-slate-800 text-teal-400 col-net-metric">N.W (KG)</th>}
-                        {printColumns.gross && <th className="px-2 border-r border-slate-800 text-red-400 col-gross-metric">G.W (KG)</th>}
+                        <th className={`px-2 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>PCS/CTN</th>
+                        {printColumns.nbctn && <th className={`px-2 col-nbctn-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>NB CTN</th>}
+                        {printColumns.totalqty && <th className={`px-2 col-totalqty-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>TOTAL QTY</th>}
+                        {printColumns.net && <th className={`px-2 text-teal-400 col-net-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>N.W (KG)</th>}
+                        {printColumns.gross && <th className={`px-2 text-red-400 col-gross-metric border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>G.W (KG)</th>}
                         {printColumns.cbm && <th className="px-2 col-cbm-metric">CBM (m³)</th>}
                       </tr>
                     </thead>
@@ -4090,21 +4106,21 @@ export default function App() {
                               >
                                 {printColumns.ctn && (
                                   <>
-                                    <td className="py-2 px-2 text-center font-bold text-slate-100 col-ctn-index">{currentStart}</td>
-                                    <td className="py-2 px-2 text-center font-bold text-slate-100 col-ctn-index">{currentEnd}</td>
+                                    <td className={`py-2 px-2 text-center font-bold col-ctn-index ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>{currentStart}</td>
+                                    <td className={`py-2 px-2 text-center font-bold col-ctn-index ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>{currentEnd}</td>
                                   </>
                                 )}
                                 {printColumns.color && <td className="px-2 font-bold col-color-lbl" style={{ color: res.color }}>{res.nom}</td>}
                                 {showSkuColCombined && <td className="px-3 truncate max-w-28 text-[11px] text-emerald-500 col-sku-lbl">{row.skus.join('/') || '—'}</td>}
                                 {printColumns.sizes && summaryUniqueSizes.map(t => (
-                                  <td key={t} className="px-2 text-center font-bold col-sizes-cells">{row.sizes[t] || ''}</td>
+                                  <td key={t} className={`px-2 text-center font-bold col-sizes-cells ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{row.sizes[t] || ''}</td>
                                 ))}
-                                <td className="px-2 text-center font-bold">{row.pcsPerCarton}</td>
-                                {printColumns.nbctn && <td className="px-2 text-center font-black col-nbctn-metric">{row.nbr}</td>}
-                                {printColumns.totalqty && <td className="px-2 text-center font-black bg-slate-900/10 text-slate-100 col-totalqty-metric">{row.totalPcs}</td>}
+                                <td className={`px-2 text-center font-bold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{row.pcsPerCarton}</td>
+                                {printColumns.nbctn && <td className={`px-2 text-center font-black col-nbctn-metric ${darkMode ? 'text-slate-100' : 'text-slate-950'}`}>{row.nbr}</td>}
+                                {printColumns.totalqty && <td className={`px-2 text-center font-black bg-slate-900/10 col-totalqty-metric ${darkMode ? 'text-slate-100' : 'text-slate-950'}`}>{row.totalPcs}</td>}
                                 {printColumns.net && <td className="px-2 text-center font-bold text-teal-400 col-net-metric">{row.netWeightRow.toFixed(2)}</td>}
-                                {printColumns.gross && <td className="px-2 text-center font-bold text-red-200 col-gross-metric">{row.grossWeightRow.toFixed(2)}</td>}
-                                {printColumns.cbm && <td className="px-2 text-center text-slate-400 col-cbm-metric">{row.cbmRow.toFixed(4)}</td>}
+                                {printColumns.gross && <td className={`px-2 text-center font-bold col-gross-metric ${darkMode ? 'text-red-300' : 'text-red-650'}`}>{row.grossWeightRow.toFixed(2)}</td>}
+                                {printColumns.cbm && <td className={`px-2 text-center col-cbm-metric ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{row.cbmRow.toFixed(4)}</td>}
                               </tr>
                             );
                           });
@@ -4141,26 +4157,34 @@ export default function App() {
                     <div className="bg-[#f6e05e] border border-amber-500/60 font-mono font-bold px-4 py-2 text-slate-900 rounded-lg text-xs">
                       📊 COLOR / SIZE BREAKDOWN COMBINED (Ledger global des colisages)
                     </div>
-                    <div className="overflow-x-auto rounded-lg border border-slate-800">
+                    <div className={`overflow-x-auto rounded-lg border ${
+                      darkMode ? 'border-slate-800' : 'border-slate-200 bg-white'
+                    }`}>
                       <table className="w-full text-xs text-center border-collapse">
                         <thead>
-                          <tr className="bg-slate-900 font-mono font-semibold text-slate-400 border-b border-slate-800">
-                            <th className="py-2 px-3 text-left border-r border-slate-800">COLOR / COULEUR</th>
-                            {summaryUniqueSizes.map(t2 => <th key={t2} className="border-r border-slate-800">{t2}</th>)}
+                          <tr className={`font-mono font-semibold border-b ${
+                            darkMode ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}>
+                            <th className={`py-2 px-3 text-left border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>COLOR / COULEUR</th>
+                            {summaryUniqueSizes.map(t2 => <th key={t2} className={`border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>{t2}</th>)}
                             <th>TOTAL PCS</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800 font-mono font-medium">
+                        <tbody className={`divide-y font-mono font-medium ${darkMode ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'}`}>
                           {activeResults.map((res, ci) => (
-                            <tr key={ci} className="hover:bg-slate-800/40 divide-x divide-slate-800/40">
+                            <tr key={ci} className={`hover:bg-slate-800/40 divide-x ${darkMode ? 'divide-slate-800/40' : 'divide-slate-200'}`}>
                               <td className="py-2 px-3 text-left font-bold" style={{ color: res.color }}>{res.nom}</td>
                               {summaryUniqueSizes.map(t => (
                                 <td key={t} className="font-bold">{res.totals.sizes[t] || ''}</td>
                               ))}
-                              <td className="font-black text-slate-200">{res.totals.p}</td>
+                              <td className={`font-black ${darkMode ? 'text-slate-200' : 'text-slate-900'}`}>{res.totals.p}</td>
                             </tr>
                           ))}
-                          <tr className="bg-amber-500/10 dark:bg-amber-955/30 text-amber-800 dark:text-amber-400 font-extrabold border-t-2 border-t-amber-500/80 divide-x divide-slate-800">
+                          <tr className={`font-extrabold border-t-2 divide-x ${
+                            darkMode 
+                              ? 'bg-amber-500/10 text-amber-400 border-t-amber-500/80 divide-slate-800' 
+                              : 'bg-amber-500/5 text-amber-850 border-t-amber-500/60 divide-slate-200'
+                          }`}>
                             <td className="py-2.5 px-3 text-left">TOTAL SHIFT</td>
                             {summaryUniqueSizes.map(t => {
                               let sumT = 0;
@@ -4218,22 +4242,28 @@ export default function App() {
                   📊 COLOR / SIZE BREAKDOWN SUMMARY
                 </div>
 
-                <div className="overflow-x-auto rounded-lg border border-slate-800">
+                <div className={`overflow-x-auto rounded-lg border ${
+                  darkMode ? 'border-slate-800' : 'border-slate-200 bg-white'
+                }`}>
                   <table className="w-full text-xs text-center border-collapse">
                     <thead>
-                      <tr className="bg-slate-900 font-mono font-semibold text-slate-400 border-b border-slate-800">
-                        <th className="py-2 px-3 text-left border-r border-slate-800">COLORS / COULEURS</th>
-                        {activeResults[0].tailles.filter(t => isStandardSizeAlwaysShown(t) || (colors[activeResults[0].colorIndex ?? 0]?.sizes[t]?.qtyTot || 0) > 0).map(t => <th key={t} className="border-r border-slate-800">{t}</th>)}
+                      <tr className={`font-mono font-semibold border-b ${
+                        darkMode ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                      }`}>
+                        <th className={`py-2 px-3 text-left border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>COLORS / COULEURS</th>
+                        {activeResults[0].tailles.filter(t => isStandardSizeAlwaysShown(t) || (colors[activeResults[0].colorIndex ?? 0]?.sizes[t]?.qtyTot || 0) > 0).map(t => (
+                          <th key={t} className={`border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>{t}</th>
+                        ))}
                         <th>TOTAL QTY</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800 font-mono font-medium">
-                      <tr className="divide-x divide-slate-850">
+                    <tbody className={`divide-y font-mono font-medium ${darkMode ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'}`}>
+                      <tr className={`divide-x ${darkMode ? 'divide-slate-800' : 'divide-slate-200'}`}>
                         <td className="py-2 px-3 text-left font-bold" style={{ color: activeResults[0].color }}>{activeResults[0].nom}</td>
                         {activeResults[0].tailles.filter(t => isStandardSizeAlwaysShown(t) || (colors[activeResults[0].colorIndex ?? 0]?.sizes[t]?.qtyTot || 0) > 0).map(t => (
                           <td key={t} className="font-bold">{activeResults[0].totals.sizes[t] || ''}</td>
                         ))}
-                        <td className="font-black text-slate-100">{activeResults[0].totals.p}</td>
+                        <td className={`font-black ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>{activeResults[0].totals.p}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -4241,21 +4271,21 @@ export default function App() {
 
                 {printSections.stats && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 print-stats-box break-inside-avoid">
-                    <div className="p-3 rounded-lg border border-slate-800 bg-slate-900/10">
+                    <div className={`p-3 rounded-lg border bg-slate-900/10 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                       <div className="text-[9px] font-mono text-slate-500 font-bold uppercase">Cartons :</div>
-                      <div className="text-sm font-bold font-mono text-white mt-0.5">{activeResults[0].totals.c}</div>
+                      <div className={`text-sm font-bold font-mono mt-0.5 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{activeResults[0].totals.c}</div>
                     </div>
-                    <div className="p-3 rounded-lg border border-slate-800 bg-slate-900/10">
+                    <div className={`p-3 rounded-lg border bg-slate-900/10 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                       <div className="text-[9px] font-mono text-slate-500 font-bold uppercase">Poids Net :</div>
-                      <div className="text-sm font-bold font-mono text-teal-455 mt-0.5">{activeResults[0].totals.n.toFixed(2)} KG</div>
+                      <div className="text-sm font-bold font-mono text-teal-500 mt-0.5">{activeResults[0].totals.n.toFixed(2)} KG</div>
                     </div>
-                    <div className="p-3 rounded-lg border border-slate-800 bg-slate-900/10">
+                    <div className={`p-3 rounded-lg border bg-slate-900/10 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                       <div className="text-[9px] font-mono text-slate-500 font-bold uppercase">Poids Brut :</div>
-                      <div className="text-sm font-bold font-mono text-red-400 mt-0.5">{activeResults[0].totals.g.toFixed(2)} KG</div>
+                      <div className="text-sm font-bold font-mono text-red-500 mt-0.5">{activeResults[0].totals.g.toFixed(2)} KG</div>
                     </div>
-                    <div className="p-3 rounded-lg border border-slate-800 bg-slate-900/10">
+                    <div className={`p-3 rounded-lg border bg-slate-900/10 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
                       <div className="text-[9px] font-mono text-slate-500 font-bold uppercase">Volume Total :</div>
-                      <div className="text-sm font-bold font-mono text-blue-455 mt-0.5">{activeResults[0].totals.v.toFixed(4)} m³</div>
+                      <div className="text-sm font-bold font-mono text-blue-500 mt-0.5">{activeResults[0].totals.v.toFixed(4)} m³</div>
                     </div>
                   </div>
                 )}

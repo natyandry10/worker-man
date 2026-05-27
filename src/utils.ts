@@ -880,182 +880,228 @@ export async function exportToExcel(
 
   wsRecap.getRow(recapRowIdx).height = 24;
 
-  // Render secondary distributions (color and size distributions metrics side-by-side)
-  recapRowIdx += 3;
+  // 0.D PROJECTION DES COLIS SHEET
+  const wsProj = wb.addWorksheet('PROJECTION DES COLIS', {
+    pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1 }
+  });
 
-  // Title Row for Distributions
-  wsRecap.mergeCells(recapRowIdx, 1, recapRowIdx, 3);
-  const colDistTitle = wsRecap.getRow(recapRowIdx).getCell(1);
-  colDistTitle.value = "🎨 RÉPARTITION DES QUANTITÉS PAR COULEUR";
-  colDistTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.navyBg } };
-  colDistTitle.font = { color: { argb: 'FF' + colorsHex.navyFg }, size: 9, bold: true };
-  colDistTitle.alignment = { horizontal: 'center', vertical: 'middle' };
-
-  wsRecap.mergeCells(recapRowIdx, 4, recapRowIdx, 6);
-  const sizeDistTitle = wsRecap.getRow(recapRowIdx).getCell(4);
-  sizeDistTitle.value = "📐 RÉPARTITION DES QUANTITÉS PAR TAILLE";
-  sizeDistTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.navyBg } };
-  sizeDistTitle.font = { color: { argb: 'FF' + colorsHex.navyFg }, size: 9, bold: true };
-  sizeDistTitle.alignment = { horizontal: 'center', vertical: 'middle' };
-
-  wsRecap.getRow(recapRowIdx).height = 22;
-  recapRowIdx++;
-
-  // Column headers row
-  const distHdrRow = wsRecap.getRow(recapRowIdx);
-  const distHeaders = [
-    "Couleur", "Quantité (Pcs)", "Part (%)",
-    "Taille", "Quantité (Pcs)", "Part (%)"
+  wsProj.columns = [
+    { width: 32 }, // Column 1: Indication par colisage
+    ...Array.from({ length: 15 }).map(() => ({ width: 12 })) // Size columns
   ];
-  distHeaders.forEach((val, idx) => {
-    const cell = distHdrRow.getCell(idx + 1);
-    cell.value = val;
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.blueBg } };
-    cell.font = { color: { argb: 'FF' + colorsHex.blueFg }, size: 10, bold: true };
-    cell.border = borderThin;
-    cell.alignment = { horizontal: 'center', vertical: 'middle' };
-  });
-  wsRecap.getRow(recapRowIdx).height = 22;
-  recapRowIdx++;
 
-  // Collect and compile all unique sizes present
-  const summarySizes: string[] = [];
-  allResults.forEach(r => {
-    r.tailles.forEach((t: string) => {
-      const q = r.totals.sizes[t] || 0;
-      if (isStandardSizeAlwaysShown(t) || q > 0) {
-        if (!summarySizes.includes(t)) {
-          summarySizes.push(t);
-        }
+  wsProj.mergeCells('A1:L1');
+  const projTitle = wsProj.getCell('A1');
+  projTitle.value = "SYNTHÈSE DE PROJECTION DES COLIS (SAISIE ACTUELLE)";
+  projTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.navyBg } };
+  projTitle.font = { color: { argb: 'FF' + colorsHex.navyFg }, size: 14, bold: true, name: 'Calibri' };
+  projTitle.alignment = { horizontal: 'center', vertical: 'middle' };
+  wsProj.getRow(1).height = 36;
+
+  wsProj.mergeCells('A2:L2');
+  const projSub = wsProj.getCell('A2');
+  projSub.value = "TABLEAU DE PROJECTION DES CARTONS, QUANTITÉS PLEINES (PACKÉES) ET COUPE DE RESTES DE COLISAGE";
+  projSub.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBF4FF' } };
+  projSub.font = { color: { argb: 'FF' + colorsHex.infoFg }, size: 10, bold: true, italic: true };
+  projSub.alignment = { horizontal: 'center', vertical: 'middle' };
+  wsProj.getRow(2).height = 24;
+
+  let pRowIdx = 4;
+
+  allResults.forEach((res, ci) => {
+    const realIdx = res.colorIndex ?? ci;
+    const sizes = originalSizesInputs[realIdx]?.D || {};
+    const tailles = res.tailles; 
+
+    let sumQtyTot = 0;
+    let sumQtyFullCtn = 0;
+    let sumQtyFullPcs = 0;
+    let sumQtyLastPcs = 0;
+
+    tailles.forEach(t => {
+      const qTot = sizes[t]?.qtyTot || 0;
+      const c = sizes[t]?.cap || 25;
+      const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
+      const fullPcs = fullCtn * c;
+      const lastPcs = qTot - fullPcs;
+
+      sumQtyTot += qTot;
+      sumQtyFullCtn += fullCtn;
+      sumQtyFullPcs += fullPcs;
+      sumQtyLastPcs += lastPcs;
+    });
+
+    // 1. Color row
+    wsProj.mergeCells(pRowIdx, 1, pRowIdx, tailles.length + 2);
+    const colorBanner = wsProj.getRow(pRowIdx).getCell(1);
+    colorBanner.value = `🎨 COULEUR : ${res.nom.toUpperCase()} (${res.totals.c} ${res.totals.c > 1 ? 'cartons' : 'carton'})`;
+    colorBanner.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.styleBg } };
+    colorBanner.font = { color: { argb: 'FFFFFFFF' }, size: 11, bold: true };
+    colorBanner.alignment = { horizontal: 'left', vertical: 'middle' };
+    wsProj.getRow(pRowIdx).height = 24;
+    pRowIdx++;
+
+    // 2. Table Header
+    const gridHdr = wsProj.getRow(pRowIdx);
+    const firstCell = gridHdr.getCell(1);
+    firstCell.value = "INDICATION PAR COLISAGE";
+    firstCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBF4FF' } };
+    firstCell.font = { color: { argb: 'FF' + colorsHex.infoFg }, size: 9, bold: true };
+    firstCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    firstCell.border = borderThin;
+
+    tailles.forEach((t, tIdx) => {
+      const cell = gridHdr.getCell(tIdx + 2);
+      cell.value = t;
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.blueBg } };
+      cell.font = { color: { argb: 'FF' + colorsHex.blueFg }, size: 10, bold: true };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = borderThin;
+    });
+
+    const ttlColIdx = tailles.length + 2;
+    const cellTtl = gridHdr.getCell(ttlColIdx);
+    cellTtl.value = "TOTALE";
+    cellTtl.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF6E05E' } };
+    cellTtl.font = { color: { argb: 'FF1A1A1A' }, size: 10, bold: true };
+    cellTtl.alignment = { horizontal: 'center', vertical: 'middle' };
+    cellTtl.border = borderThin;
+
+    wsProj.getRow(pRowIdx).height = 22;
+    pRowIdx++;
+
+    // Row: QTY PCS TOTALE
+    const rQtyTot = wsProj.getRow(pRowIdx);
+    rQtyTot.getCell(1).value = "QTY PCS TOTALE";
+    rQtyTot.getCell(1).font = { size: 10, bold: true };
+    rQtyTot.getCell(1).border = borderThin;
+    rQtyTot.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    rQtyTot.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    tailles.forEach((t, tIdx) => {
+      const cell = rQtyTot.getCell(tIdx + 2);
+      cell.value = sizes[t]?.qtyTot || 0;
+      cell.font = { size: 10, bold: true };
+      cell.border = borderThin;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+    const cellTotValue = rQtyTot.getCell(ttlColIdx);
+    cellTotValue.value = sumQtyTot;
+    cellTotValue.font = { size: 10, bold: true, color: { argb: 'FF0E6655' } };
+    cellTotValue.border = borderThin;
+    cellTotValue.alignment = { horizontal: 'center', vertical: 'middle' };
+    cellTotValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F8F5' } };
+    wsProj.getRow(pRowIdx).height = 20;
+    pRowIdx++;
+
+    // Row: QTY PCS PAR CARTON
+    const rQtyCap = wsProj.getRow(pRowIdx);
+    rQtyCap.getCell(1).value = "QTY PCS PAR CARTON";
+    rQtyCap.getCell(1).font = { size: 10 };
+    rQtyCap.getCell(1).border = borderThin;
+    rQtyCap.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    rQtyCap.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    tailles.forEach((t, tIdx) => {
+      const cell = rQtyCap.getCell(tIdx + 2);
+      cell.value = sizes[t]?.cap || 0;
+      cell.font = { size: 10 };
+      cell.border = borderThin;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+    const cellCapValue = rQtyCap.getCell(ttlColIdx);
+    cellCapValue.value = "—";
+    cellCapValue.font = { size: 10, color: { argb: 'FF777777' } };
+    cellCapValue.border = borderThin;
+    cellCapValue.alignment = { horizontal: 'center', vertical: 'middle' };
+    wsProj.getRow(pRowIdx).height = 20;
+    pRowIdx++;
+
+    // Row: QTY CARTON FULL
+    const rCtnFull = wsProj.getRow(pRowIdx);
+    rCtnFull.getCell(1).value = "QTY CARTON FULL";
+    rCtnFull.getCell(1).font = { size: 10 };
+    rCtnFull.getCell(1).border = borderThin;
+    rCtnFull.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    rCtnFull.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    tailles.forEach((t, tIdx) => {
+      const cell = rCtnFull.getCell(tIdx + 2);
+      const qTot = sizes[t]?.qtyTot || 0;
+      const c = sizes[t]?.cap || 0;
+      cell.value = c > 0 ? Math.floor(qTot / c) : 0;
+      cell.font = { size: 10 };
+      cell.border = borderThin;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+    const cellCtnFullValue = rCtnFull.getCell(ttlColIdx);
+    cellCtnFullValue.value = sumQtyFullCtn;
+    cellCtnFullValue.font = { size: 10, bold: true, color: { argb: 'FFB71C1C' } };
+    cellCtnFullValue.border = borderThin;
+    cellCtnFullValue.alignment = { horizontal: 'center', vertical: 'middle' };
+    cellCtnFullValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDEDEC' } };
+    wsProj.getRow(pRowIdx).height = 20;
+    pRowIdx++;
+
+    // Row: QTY PCS FULL (TOTAL PACKÉ)
+    const rPcsFull = wsProj.getRow(pRowIdx);
+    rPcsFull.getCell(1).value = "QTY PCS FULL (TOTAL PACKÉ)";
+    rPcsFull.getCell(1).font = { size: 10 };
+    rPcsFull.getCell(1).border = borderThin;
+    rPcsFull.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    rPcsFull.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    tailles.forEach((t, tIdx) => {
+      const cell = rPcsFull.getCell(tIdx + 2);
+      const qTot = sizes[t]?.qtyTot || 0;
+      const c = sizes[t]?.cap || 0;
+      cell.value = c > 0 ? Math.floor(qTot / c) * c : 0;
+      cell.font = { size: 10 };
+      cell.border = borderThin;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+    const cellPcsFullValue = rPcsFull.getCell(ttlColIdx);
+    cellPcsFullValue.value = sumQtyFullPcs;
+    cellPcsFullValue.font = { size: 10, bold: true, color: { argb: 'FF1F618D' } };
+    cellPcsFullValue.border = borderThin;
+    cellPcsFullValue.alignment = { horizontal: 'center', vertical: 'middle' };
+    cellPcsFullValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBF5FB' } };
+    wsProj.getRow(pRowIdx).height = 20;
+    pRowIdx++;
+
+    // Row: QTY PCS LAST (RESTE)
+    const rPcsLast = wsProj.getRow(pRowIdx);
+    rPcsLast.getCell(1).value = "QTY PCS LAST (RESTE)";
+    rPcsLast.getCell(1).font = { size: 10, bold: true };
+    rPcsLast.getCell(1).border = borderThin;
+    rPcsLast.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    rPcsLast.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    tailles.forEach((t, tIdx) => {
+      const cell = rPcsLast.getCell(tIdx + 2);
+      const qTot = sizes[t]?.qtyTot || 0;
+      const c = sizes[t]?.cap || 0;
+      const rem = qTot - (c > 0 ? Math.floor(qTot / c) * c : 0);
+      cell.value = rem;
+      cell.font = { size: 10, bold: true };
+      cell.border = borderThin;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      if (rem > 0) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEBEE' } }; // Light red
+        cell.font = { size: 10, bold: true, color: { argb: 'FFC62828' } };
       }
     });
+    const cellPcsLastValue = rPcsLast.getCell(ttlColIdx);
+    cellPcsLastValue.value = sumQtyLastPcs;
+    cellPcsLastValue.font = { size: 10, bold: true, color: { argb: 'FFC62828' } };
+    cellPcsLastValue.border = borderThin;
+    cellPcsLastValue.alignment = { horizontal: 'center', vertical: 'middle' };
+    cellPcsLastValue.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEBEE' } };
+    wsProj.getRow(pRowIdx).height = 22;
+    pRowIdx++;
+
+    pRowIdx += 2; // Extra blank row spacing
   });
-
-  const sizeSums: { [size: string]: number } = {};
-  summarySizes.forEach(s => { sizeSums[s] = 0; });
-  allResults.forEach(r => {
-    summarySizes.forEach(s => {
-      sizeSums[s] += (r.totals.sizes[s] || 0);
-    });
-  });
-
-  const maxLen = Math.max(allResults.length, summarySizes.length);
-
-  for (let i = 0; i < maxLen; i++) {
-    const dRow = wsRecap.getRow(recapRowIdx);
-    dRow.height = 20;
-
-    // Left block: Color info
-    if (i < allResults.length) {
-      const res = allResults[i];
-      const pct = gPcs > 0 ? (res.totals.p / gPcs) * 100 : 0;
-
-      const cellCol = dRow.getCell(1);
-      cellCol.value = res.nom;
-      cellCol.font = { bold: true };
-      cellCol.alignment = { horizontal: 'left', vertical: 'middle' };
-      cellCol.border = borderThin;
-      cellCol.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-
-      const cellQty = dRow.getCell(2);
-      cellQty.value = res.totals.p;
-      cellQty.font = { bold: true, color: { argb: 'FFD35400' } };
-      cellQty.alignment = { horizontal: 'center', vertical: 'middle' };
-      cellQty.border = borderThin;
-      cellQty.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-
-      const cellPct = dRow.getCell(3);
-      cellPct.value = `${pct.toFixed(1)} %`;
-      cellPct.alignment = { horizontal: 'center', vertical: 'middle' };
-      cellPct.border = borderThin;
-      cellPct.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-    } else {
-      for (let c = 1; c <= 3; c++) {
-        const cell = dRow.getCell(c);
-        cell.border = borderThin;
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
-      }
-    }
-
-    // Right block: Size info
-    if (i < summarySizes.length) {
-      const szName = summarySizes[i];
-      const szQty = sizeSums[szName] || 0;
-      const pct = gPcs > 0 ? (szQty / gPcs) * 100 : 0;
-
-      const cellCol = dRow.getCell(4);
-      cellCol.value = szName;
-      cellCol.font = { bold: true };
-      cellCol.alignment = { horizontal: 'center', vertical: 'middle' };
-      cellCol.border = borderThin;
-      cellCol.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-
-      const cellQty = dRow.getCell(5);
-      cellQty.value = szQty;
-      cellQty.font = { bold: true, color: { argb: 'FF0E6655' } };
-      cellQty.alignment = { horizontal: 'center', vertical: 'middle' };
-      cellQty.border = borderThin;
-      cellQty.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-
-      const cellPct = dRow.getCell(6);
-      cellPct.value = `${pct.toFixed(1)} %`;
-      cellPct.alignment = { horizontal: 'center', vertical: 'middle' };
-      cellPct.border = borderThin;
-      cellPct.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
-    } else {
-      for (let c = 4; c <= 6; c++) {
-        const cell = dRow.getCell(c);
-        cell.border = borderThin;
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
-      }
-    }
-
-    recapRowIdx++;
-  }
-
-  // Final Distributions Total Row
-  const distTotalRow = wsRecap.getRow(recapRowIdx);
-  distTotalRow.height = 22;
-
-  // Left Total cells
-  distTotalRow.getCell(1).value = "TOTAL PIÈCES";
-  distTotalRow.getCell(1).font = { bold: true, size: 9 };
-  distTotalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
-  distTotalRow.getCell(1).border = borderMedium;
-  distTotalRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.totalBg } };
-
-  distTotalRow.getCell(2).value = gPcs;
-  distTotalRow.getCell(2).font = { bold: true, color: { argb: 'FF7B6000' } };
-  distTotalRow.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
-  distTotalRow.getCell(2).border = borderMedium;
-  distTotalRow.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.totalBg } };
-
-  distTotalRow.getCell(3).value = "100.0 %";
-  distTotalRow.getCell(3).font = { bold: true };
-  distTotalRow.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
-  distTotalRow.getCell(3).border = borderMedium;
-  distTotalRow.getCell(3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.totalBg } };
-
-  // Right Total cells
-  distTotalRow.getCell(4).value = "TOTAL PIÈCES";
-  distTotalRow.getCell(4).font = { bold: true, size: 9 };
-  distTotalRow.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
-  distTotalRow.getCell(4).border = borderMedium;
-  distTotalRow.getCell(4).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.totalBg } };
-
-  distTotalRow.getCell(5).value = gPcs;
-  distTotalRow.getCell(5).font = { bold: true, color: { argb: 'FF7B6000' } };
-  distTotalRow.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' };
-  distTotalRow.getCell(5).border = borderMedium;
-  distTotalRow.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.totalBg } };
-
-  distTotalRow.getCell(6).value = "100.0 %";
-  distTotalRow.getCell(6).font = { bold: true };
-  distTotalRow.getCell(6).alignment = { horizontal: 'center', vertical: 'middle' };
-  distTotalRow.getCell(6).border = borderMedium;
-  distTotalRow.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.totalBg } };
-
-  recapRowIdx++;
 
   // 0.C SAISIE COLISAGE SHEET (INPUT GRID ORIGINAL VALUES)
   const wsSaisie = wb.addWorksheet('SAISIE COLISAGE', {

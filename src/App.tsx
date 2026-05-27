@@ -248,6 +248,22 @@ export default function App() {
   const [sqlStatus, setSqlStatus] = useState<string | null>(null);
   const [isCapturingScreen, setIsCapturingScreen] = useState(false);
 
+  // Modern global toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const triggerToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   // Sync selected export colors when results compute
   useEffect(() => {
     if (results.length > 0) {
@@ -607,6 +623,36 @@ export default function App() {
     }
   };
 
+  const handleUpdateActiveColorAllSizes = (field: keyof SizeDetails, val: string | number, isSkuPrefix: boolean = false) => {
+    const nextColors = colors.map((c, i) => {
+      if (i !== activeColorIdx) return c;
+      const nextSizes = { ...c.sizes };
+      c.tailles.forEach(sz => {
+        let valueToSet = val;
+        if (isSkuPrefix) {
+          valueToSet = String(val).trim() + "-" + sz;
+        } else if (field !== 'sku') {
+          valueToSet = typeof val === 'string' ? parseFloat(val) || 0 : val;
+        } else {
+          valueToSet = String(val);
+        }
+
+        nextSizes[sz] = {
+          ...nextSizes[sz],
+          [field]: valueToSet
+        };
+      });
+      return { ...c, sizes: nextSizes };
+    });
+
+    setColors(nextColors);
+    setHasGenerated(false);
+
+    if (field === 'qtyTot') {
+      updateFilenameAndTotal(meta, nextColors);
+    }
+  };
+
   const handlePasteGrid2D = (
     e: React.ClipboardEvent<HTMLInputElement>,
     startingSizeName: string,
@@ -677,6 +723,7 @@ export default function App() {
     if (startingFieldIdx === 0 || lines.length > 1) {
       updateFilenameAndTotal(meta, nextColors);
     }
+    triggerToast('⚡ Données collées depuis le presse-papiers !', 'success');
   };
 
   // Model automatic loaders
@@ -700,6 +747,7 @@ export default function App() {
     });
     setColors(nextColors);
     setHasGenerated(false);
+    triggerToast(`📐 Dimensions appliquées : ${matched.name} (${matched.L}x${matched.l}x${matched.h} cm)`, 'success');
   };
 
   const handleApplyPieceWeightModel = (modelName: string) => {
@@ -719,6 +767,7 @@ export default function App() {
     });
     setColors(nextColors);
     setHasGenerated(false);
+    triggerToast(`⚖️ Poids unitaire appliqué : ${matched.name} (${matched.wPiece} KG)`, 'success');
   };
 
   const handleApplyCartonWeightModel = (modelName: string) => {
@@ -738,6 +787,7 @@ export default function App() {
     });
     setColors(nextColors);
     setHasGenerated(false);
+    triggerToast(`📦 Tare carton vide appliquée : ${matched.name} (${matched.wCarton} KG)`, 'success');
   };
 
   // Box details modal triggers
@@ -764,6 +814,7 @@ export default function App() {
     setColors(nextColors);
     setBoxModalCtx(null);
     setHasGenerated(false);
+    triggerToast(`🛠️ Gabarit de colisage mis à jour pour ${sizeName} !`, 'success');
   };
 
   // Generate Results Trigger
@@ -838,12 +889,12 @@ export default function App() {
       };
 
       setSavedLists(prev => [newListItem, ...prev]);
-      setSavesSuccess(`✅ Fiche sauvegardée avec succès : "${finalName}"`);
+      triggerToast(`💾 Fiche sauvegardée : "${finalName}"`, 'success');
       setSavesError(null);
       setSaveNameInput('');
-      setTimeout(() => setSavesSuccess(null), 4000);
     } catch (err: any) {
       setSavesError(`❌ Erreur lors de la sauvegarde : ${err?.message || err}`);
+      triggerToast(`Erreur lors de la sauvegarde`, 'error');
     }
   };
 
@@ -857,11 +908,11 @@ export default function App() {
       setColors(JSON.parse(JSON.stringify(item.colors))); // deep copy
       setHasGenerated(false);
       setResults([]);
-      setSavesSuccess(`🔌 Fiche "${item.name}" rechargée avec succès !`);
+      triggerToast(`🔌 Fiche "${item.name}" rechargée !`, 'success');
       setSavesError(null);
-      setTimeout(() => setSavesSuccess(null), 4000);
     } catch (err: any) {
       setSavesError(`❌ Erreur lors du rechargement de la fiche : ${err?.message || err}`);
+      triggerToast(`Erreur de chargement`, 'error');
     }
   };
 
@@ -869,8 +920,7 @@ export default function App() {
   const handleDeleteSavedList = (id: string, name: string) => {
     setSavedLists(prev => prev.filter(item => item.id !== id));
     setConfirmDeleteId(null);
-    setSavesSuccess(`🗑️ Sauvegarde "${name}" supprimée.`);
-    setTimeout(() => setSavesSuccess(null), 3500);
+    triggerToast(`🗑️ Sauvegarde "${name}" supprimée.`, 'info');
   };
 
   // Excel Exports
@@ -2354,7 +2404,22 @@ export default function App() {
                               }`}
                             >
                               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PALETTE[idx % PALETTE.length] }} />
-                              {c.nom || `COULEUR ${idx + 1}`}
+                              <span className="truncate max-w-[115px]">{c.nom || `COULEUR ${idx + 1}`}</span>
+                              {(() => {
+                                const sum = c.tailles.reduce((acc, t) => acc + (c.sizes[t]?.qtyTot || 0), 0);
+                                if (sum > 0) {
+                                  return (
+                                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono leading-none ${
+                                      activeColorIdx === idx
+                                        ? 'bg-[#ff5000]/20 text-[#ff5000] font-black'
+                                        : 'bg-slate-500/10 text-slate-400'
+                                    }`}>
+                                      {sum}
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              })()}
                             </button>
                           ))}
                         </div>
@@ -2565,6 +2630,69 @@ export default function App() {
                     )}
                   </div>
                 </div>
+
+                {/* Real-time cargo statistics estimates to see live calculations as you update numbers */}
+                {activeColorResult && (
+                  <div className={`grid grid-cols-2 lg:grid-cols-5 gap-3 p-3.5 border rounded-xl transition-all duration-300 ${
+                    darkMode ? 'bg-slate-900/60 border-slate-800' : 'bg-[#f0f4f8] border-slate-200'
+                  }`}>
+                    <div className={`p-2 rounded-lg border flex flex-col justify-center ${
+                      darkMode ? 'bg-[#10121d] border-slate-800/80' : 'bg-white border-slate-200 shadow-xs'
+                    }`}>
+                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-tight flex items-center gap-1">
+                        👕 Total Pièces
+                      </span>
+                      <span className={`text-xs font-bold font-mono mt-0.5 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+                        {activeColorResult.totals.p} pcs
+                      </span>
+                    </div>
+
+                    <div className={`p-2 rounded-lg border flex flex-col justify-center ${
+                      darkMode ? 'bg-[#10121d] border-slate-800/80' : 'bg-white border-slate-200 shadow-xs'
+                    }`}>
+                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-tight flex items-center gap-1">
+                        📦 Cartons Projetés
+                      </span>
+                      <span className={`text-xs font-bold font-mono mt-0.5 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                        {activeColorResult.totals.c} {activeColorResult.totals.c > 1 ? 'ctns' : 'ctn'}
+                      </span>
+                    </div>
+
+                    <div className={`p-2 rounded-lg border flex flex-col justify-center ${
+                      darkMode ? 'bg-[#10121d] border-slate-800/80' : 'bg-white border-slate-200 shadow-xs'
+                    }`}>
+                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-tight flex items-center gap-1">
+                        ⚖️ Poids Net Estimé
+                      </span>
+                      <span className={`text-xs font-bold font-mono mt-0.5 ${darkMode ? 'text-teal-400' : 'text-teal-600'}`}>
+                        {activeColorResult.totals.n.toFixed(2)} KG
+                      </span>
+                    </div>
+
+                    <div className={`p-2 rounded-lg border flex flex-col justify-center ${
+                      darkMode ? 'bg-[#10121d] border-slate-800/80' : 'bg-white border-slate-200 shadow-xs'
+                    }`}>
+                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-tight flex items-center gap-1">
+                        🏋️ Poids Brut Estimé
+                      </span>
+                      <span className={`text-xs font-bold font-mono mt-0.5 ${darkMode ? 'text-red-400' : 'text-red-500'}`}>
+                        {activeColorResult.totals.g.toFixed(2)} KG
+                      </span>
+                    </div>
+
+                    <div className={`p-2 rounded-lg border flex flex-col justify-center col-span-2 lg:col-span-1 ${
+                      darkMode ? 'bg-[#10121d] border-slate-800/80' : 'bg-white border-slate-200 shadow-xs'
+                    }`}>
+                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-tight flex items-center gap-1">
+                        📐 Cube Global Vol
+                      </span>
+                      <span className={`text-xs font-bold font-mono mt-0.5 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                        {activeColorResult.totals.v.toFixed(4)} m³
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className={`overflow-x-auto rounded-xl border transition-all duration-300 ${
                   darkMode ? 'border-slate-800 bg-slate-900/10' : 'border-slate-200 bg-slate-50/40 shadow-sm'
                 }`}>
@@ -2598,7 +2726,7 @@ export default function App() {
                       {/* Row 1: QTY Totale */}
                       <tr className={darkMode ? '' : 'hover:bg-slate-50/50'}>
                         <td className={`py-2 px-4 text-left font-sans font-semibold border-r ${
-                          darkMode ? 'border-slate-800 bg-[#222636]/10 text-slate-300' : 'border-slate-200 bg-slate-100/30 text-slate-700'
+                          darkMode ? 'border-slate-800 bg-[#222636]/10 text-slate-300' : 'border-slate-200 bg-slate-100/30 text-slate-755'
                         }`}>
                           <div className="flex flex-col">
                             <span>Quantité Totale à Emballer</span>
@@ -2643,9 +2771,35 @@ export default function App() {
                       {/* Row 2: Cap */}
                       <tr className={darkMode ? '' : 'hover:bg-slate-50/50'}>
                         <td className={`py-2 px-4 text-left font-sans font-semibold border-r ${
-                          darkMode ? 'border-slate-800 bg-[#222636]/10 text-slate-300' : 'border-slate-200 bg-slate-100/30 text-slate-700'
+                          darkMode ? 'border-slate-800 bg-[#222636]/10 text-slate-350' : 'border-slate-200 bg-slate-100/30 text-slate-750'
                         }`}>
-                          Pièces Max par Carton (Cap)
+                          <div className="flex flex-col gap-1.5">
+                            <span>Pièces Max par Carton (Cap)</span>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                min="1"
+                                placeholder="Tous"
+                                className={`w-14 px-1.5 py-0.5 text-center text-[10px] rounded border font-mono font-semibold leading-normal ${
+                                  darkMode 
+                                    ? 'bg-[#10121d] border-slate-700 text-[#ff5000] focus:border-[#ff5000]' 
+                                    : 'bg-white border-slate-300 text-[#ff5000] focus:border-[#ff5000]'
+                                } focus:outline-none`}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const val = (e.currentTarget as HTMLInputElement).value;
+                                    const num = parseInt(val, 10);
+                                    if (num > 0) {
+                                      handleUpdateActiveColorAllSizes('cap', val);
+                                      (e.currentTarget as HTMLInputElement).value = '';
+                                      triggerToast(`⚡ Capacité de ${num} pcs appliquée à toutes les tailles !`, 'success');
+                                    }
+                                  }
+                                }}
+                              />
+                              <span className="text-[9px] text-slate-500 font-mono font-medium">⏎ Appliquer</span>
+                            </div>
+                          </div>
                         </td>
                         {colors[activeColorIdx].tailles.map((sz) => (
                           <td key={sz} className={`p-1 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
@@ -2668,10 +2822,34 @@ export default function App() {
 
                       {/* Row 3: SKU per size */}
                       <tr className={darkMode ? '' : 'hover:bg-slate-50/50'}>
-                        <td className={`py-2 px-4 text-left font-sans font-semibold border-r text-emerald-400 ${
-                          darkMode ? 'border-slate-800 bg-[#222636]/10' : 'border-slate-200 bg-emerald-50/10'
+                        <td className={`py-2 px-4 text-left font-sans font-semibold border-r ${
+                          darkMode ? 'border-slate-800 bg-[#222636]/10 text-emerald-400' : 'border-slate-200 bg-emerald-50/10 text-emerald-800'
                         }`}>
-                          SKU spécifique (facultatif)
+                          <div className="flex flex-col gap-1.5">
+                            <span>SKU spécifique (facultatif)</span>
+                            <div className="flex items-center gap-1.5 font-normal text-slate-500">
+                              <input
+                                type="text"
+                                placeholder="Prefix"
+                                className={`w-16 px-1.5 py-0.5 text-center text-[10px] rounded border font-mono font-semibold leading-normal ${
+                                  darkMode 
+                                    ? 'bg-[#10121d] border-slate-700 text-emerald-350 focus:border-emerald-500' 
+                                    : 'bg-white border-slate-300 text-emerald-650 focus:border-emerald-500'
+                                } focus:outline-none`}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const val = (e.currentTarget as HTMLInputElement).value;
+                                    if (val.trim()) {
+                                      handleUpdateActiveColorAllSizes('sku', val, true);
+                                      (e.currentTarget as HTMLInputElement).value = '';
+                                      triggerToast(`⚡ SKUs générés (ex: ${val.trim()}-${colors[activeColorIdx].tailles[0]}) !`, 'success');
+                                    }
+                                  }
+                                }}
+                              />
+                              <span className="text-[9px] text-slate-500 font-mono font-medium">⏎ Remplir</span>
+                            </div>
+                          </div>
                         </td>
                         {colors[activeColorIdx].tailles.map((sz) => (
                           <td key={sz} className={`p-1 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
@@ -4301,6 +4479,29 @@ export default function App() {
         setIsCapturing={setIsCapturingScreen}
         darkMode={darkMode}
       />
+
+      {/* Dynamic Modern Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-[9999]"
+          >
+            <div className={`px-4.5 py-3 rounded-xl border flex items-center gap-2.5 text-xs font-mono font-bold shadow-xl backdrop-blur-md ${
+              toast.type === 'error'
+                ? 'bg-red-500/15 border-red-500/40 text-red-500 dark:text-red-400'
+                : toast.type === 'info'
+                  ? 'bg-blue-500/15 border-blue-500/40 text-blue-500 dark:text-blue-400'
+                  : 'bg-[#ff5000]/15 border-[#ff5000]/40 text-[#ff5000]'
+            }`}>
+              <span className="text-sm">{toast.type === 'error' ? '❌' : toast.type === 'info' ? 'ℹ️' : '✓'}</span>
+              <span>{toast.message}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

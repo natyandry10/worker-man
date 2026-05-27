@@ -51,7 +51,9 @@ import {
   parseCartonRange,
   PALETTE,
   BG_COLORS_DARK,
-  BG_COLORS_LIGHT
+  BG_COLORS_LIGHT,
+  getRemainderRowColor,
+  isRemainderRow
 } from './utils';
 
 // Default template structures
@@ -2223,14 +2225,23 @@ export default function App() {
               </motion.div>
             )}
 
-              {activeInputTab === 'colors' && (
-                <motion.div
-                  key="colors-section"
-                  initial={{ opacity: 0, x: 15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -15 }}
-                  transition={{ duration: 0.15 }}
-                >
+              {activeInputTab === 'colors' && (() => {
+                const activeColorConfig = colors[activeColorIdx];
+                const activeColorResult = activeColorConfig ? computeColorResult(
+                  activeColorConfig,
+                  globalPackingMode,
+                  forceSingleCarton,
+                  maxSizesPerBox,
+                  activeColorIdx
+                ) : null;
+                return (
+                  <motion.div
+                    key="colors-section"
+                    initial={{ opacity: 0, x: 15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -15 }}
+                    transition={{ duration: 0.15 }}
+                  >
                   {/* SPREADSHEET COLORS EDITOR */}
                   <div className={`rounded-xl border p-5 ${darkMode ? 'bg-[#121522] border-slate-800/80 shadow-black/25' : 'bg-white border-slate-200'} space-y-4 transition-all duration-300 shadow-sm`}>
                     
@@ -2513,22 +2524,38 @@ export default function App() {
                         }`}>
                           Quantité Totale à Emballer
                         </td>
-                        {colors[activeColorIdx].tailles.map((sz) => (
-                          <td key={sz} className={`p-1 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
-                            <input
-                              type="number"
-                              min="0"
-                              value={colors[activeColorIdx].sizes[sz]?.qtyTot || ''}
-                              onChange={(e) => handleUpdateSizeCell(sz, 'qtyTot', e.target.value)}
-                              className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
-                                darkMode
-                                  ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-white'
-                                  : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-850 hover:border-slate-300'
-                              }`}
-                              placeholder="0"
-                            />
-                          </td>
-                        ))}
+                        {colors[activeColorIdx].tailles.map((sz) => {
+                          const qTot = colors[activeColorIdx].sizes[sz]?.qtyTot || 0;
+                          const c = colors[activeColorIdx].sizes[sz]?.cap || 0;
+                          const lastPcs = qTot - (c > 0 ? Math.floor(qTot / c) * c : 0);
+                          let remColor: any = null;
+                          if (lastPcs > 0 && activeColorResult) {
+                            const remRow = activeColorResult.rows.find(row => row.sizes[sz] > 0 && isRemainderRow(row, activeColorConfig));
+                            if (remRow) {
+                              remColor = getRemainderRowColor(remRow, activeColorResult, activeColorConfig, darkMode);
+                            }
+                          }
+
+                          return (
+                            <td key={sz} className={`p-1 border-r ${darkMode ? 'border-slate-800' : 'border-slate-200'}`} style={remColor ? { backgroundColor: remColor.bg + '1a' } : undefined}>
+                              <input
+                                type="number"
+                                min="0"
+                                value={colors[activeColorIdx].sizes[sz]?.qtyTot || ''}
+                                onChange={(e) => handleUpdateSizeCell(sz, 'qtyTot', e.target.value)}
+                                className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
+                                  remColor
+                                    ? ''
+                                    : (darkMode
+                                      ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-white'
+                                      : 'bg-white border-slate-200 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-850 hover:border-slate-300')
+                                }`}
+                                style={remColor ? { backgroundColor: remColor.bg, color: remColor.text, borderColor: remColor.bg } : undefined}
+                                placeholder="0"
+                              />
+                            </td>
+                          );
+                        })}
                       </tr>
 
                       {/* Row 2: Cap */}
@@ -2608,12 +2635,208 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* NEW RECAP TABLE: PROJECTION DES COLIS (FULL VS LAST) */}
+                {colors[activeColorIdx] && (() => {
+                  const activeColorConfig = colors[activeColorIdx];
+                  const activeColorResult = computeColorResult(
+                    activeColorConfig,
+                    globalPackingMode,
+                    forceSingleCarton,
+                    maxSizesPerBox,
+                    activeColorIdx
+                  );
+                  
+                  // Sum metrics for the TOTALE column
+                  let sumQtyTot = 0;
+                  let sumQtyFullCtn = 0;
+                  let sumQtyFullPcs = 0;
+                  let sumQtyLastPcs = 0;
+                  
+                  activeColorConfig.tailles.forEach(t => {
+                    const qTot = activeColorConfig.sizes[t]?.qtyTot || 0;
+                    const c = activeColorConfig.sizes[t]?.cap || 25;
+                    const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
+                    const fullPcs = fullCtn * c;
+                    const lastPcs = qTot - fullPcs;
+                    
+                    sumQtyTot += qTot;
+                    sumQtyFullCtn += fullCtn;
+                    sumQtyFullPcs += fullPcs;
+                    sumQtyLastPcs += lastPcs;
+                  });
+
+                  return (
+                    <div className="mt-6 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/10 dark:bg-[#161a23]/30 px-3.5 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">📊</span>
+                          <h4 className={`text-xs font-mono font-bold uppercase tracking-wider ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                            SYNTHÈSE DE PROJECTION DES COLIS (Saisie Actuelle)
+                          </h4>
+                        </div>
+                        <div className="flex items-center gap-2 font-mono text-xs">
+                          <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>Cartons Total pour cette couleur :</span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            darkMode ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-80 * 10'
+                          }`} style={{ backgroundColor: darkMode ? '#ff500020' : '#ff500010', color: '#ff5000' }}>
+                            {activeColorResult ? activeColorResult.totals.c : 0} {activeColorResult && activeColorResult.totals.c > 1 ? 'cartons' : 'carton'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className={`overflow-x-auto rounded-xl border transition-all duration-300 ${
+                        darkMode ? 'border-slate-800 bg-[#161a23]' : 'border-slate-200 bg-white shadow-sm'
+                      }`}>
+                        <table className="w-full text-xs text-center border-collapse">
+                          <thead>
+                            <tr className={`${
+                              darkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-250'
+                            } font-mono font-bold border-b text-slate-400`}>
+                              <th className={`py-3 px-4 text-left border-r font-sans tracking-wide uppercase text-[10px] font-black ${
+                                darkMode ? 'border-slate-800 text-slate-300' : 'border-slate-200 text-slate-700'
+                              }`} style={{ width: '220px' }}>
+                                INDICATION PAR COLISAGE
+                              </th>
+                              {activeColorConfig.tailles.map((sz) => (
+                                <th key={sz} className={`p-2 border-r font-mono font-black text-xs text-[#4f8ef7] ${darkMode ? 'border-slate-800 bg-[#4f8ef7]/5' : 'border-slate-200 bg-[#4f8ef7]/5'}`}>
+                                  {sz}
+                                </th>
+                              ))}
+                              <th className={`p-2 font-mono font-black text-xs text-amber-500 ${darkMode ? 'border-slate-800 bg-amber-500/5' : 'border-slate-250 bg-amber-500/5'}`}>
+                                TOTALE
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className={`divide-y font-mono font-semibold text-slate-300 ${darkMode ? 'divide-slate-800' : 'divide-slate-200'}`}>
+                            {/* Line 1: QTY PCS TOTALE */}
+                            <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
+                              <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                              }`}>
+                                QTY PCS TOTALE
+                              </td>
+                              {activeColorConfig.tailles.map((sz) => {
+                                const qTot = activeColorConfig.sizes[sz]?.qtyTot || 0;
+                                return (
+                                  <td key={sz} className={`p-2 border-r font-black text-xs ${darkMode ? 'border-slate-800 text-slate-100' : 'border-slate-200 text-slate-805'}`}>
+                                    {qTot}
+                                  </td>
+                                );
+                              })}
+                              <td className="p-2 font-bold text-emerald-500 bg-emerald-500/5">{sumQtyTot}</td>
+                            </tr>
+
+                            {/* Line 2: QTY PCS PAR CARTON */}
+                            <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
+                              <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                              }`}>
+                                QTY PCS PAR CARTON
+                              </td>
+                              {activeColorConfig.tailles.map((sz) => {
+                                const c = activeColorConfig.sizes[sz]?.cap || 0;
+                                return (
+                                  <td key={sz} className={`p-2 border-r text-slate-500 dark:text-slate-400 font-medium ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                                    {c}
+                                  </td>
+                                );
+                              })}
+                              <td className="p-2 font-medium text-slate-500 dark:text-slate-405 font-mono">—</td>
+                            </tr>
+
+                            {/* Line 3: QTY CARTON FULL */}
+                            <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
+                              <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                              }`}>
+                                QTY CARTON FULL
+                              </td>
+                              {activeColorConfig.tailles.map((sz) => {
+                                const qTot = activeColorConfig.sizes[sz]?.qtyTot || 0;
+                                const c = activeColorConfig.sizes[sz]?.cap || 0;
+                                const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
+                                return (
+                                  <td key={sz} className={`p-2 border-r font-semibold ${darkMode ? 'border-slate-800 text-slate-200' : 'border-slate-200 text-slate-605'}`}>
+                                    {fullCtn}
+                                  </td>
+                                );
+                              })}
+                              <td className="p-2 font-black text-[#ff5000] bg-[#ff5000]/5">{sumQtyFullCtn}</td>
+                            </tr>
+
+                            {/* Line 4: QTY PCS FULL TOTALE */}
+                            <tr className={darkMode ? 'bg-slate-900/10 hover:bg-slate-800/10' : 'bg-white hover:bg-slate-50'}>
+                              <td className={`py-2.5 px-4 text-left font-sans font-medium border-r ${
+                                darkMode ? 'border-slate-800 bg-[#222636]/15 text-slate-300' : 'border-slate-200 bg-slate-100/40 text-slate-705'
+                              }`}>
+                                QTY PCS FULL (TOTAL PACKÉ)
+                              </td>
+                              {activeColorConfig.tailles.map((sz) => {
+                                const qTot = activeColorConfig.sizes[sz]?.qtyTot || 0;
+                                const c = activeColorConfig.sizes[sz]?.cap || 0;
+                                const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
+                                const fullPcs = fullCtn * c;
+                                return (
+                                  <td key={sz} className={`p-2 border-r font-medium ${darkMode ? 'border-slate-800 text-slate-300' : 'border-slate-200 text-slate-605'}`}>
+                                    {fullPcs}
+                                  </td>
+                                );
+                              })}
+                              <td className="p-2 font-black text-indigo-500 bg-indigo-500/5">{sumQtyFullPcs}</td>
+                            </tr>
+
+                            {/* Line 5: QTY PCS LAST */}
+                            <tr className={darkMode ? 'bg-[#ff5000]/5 hover:bg-[#ff5000]/10' : 'bg-amber-500/5 hover:bg-amber-500/10'}>
+                              <td className={`py-2.5 px-4 text-left font-sans font-black border-r text-red-650 dark:text-orange-400 ${
+                                darkMode ? 'border-slate-800 bg-slate-950/20' : 'border-slate-200 bg-slate-150/40'
+                              }`}>
+                                QTY PCS LAST (RESTE)
+                              </td>
+                              {activeColorConfig.tailles.map((sz) => {
+                                const qTot = activeColorConfig.sizes[sz]?.qtyTot || 0;
+                                const c = activeColorConfig.sizes[sz]?.cap || 0;
+                                const fullCtn = c > 0 ? Math.floor(qTot / c) : 0;
+                                const fullPcs = fullCtn * c;
+                                const lastPcs = qTot - fullPcs;
+                                
+                                // GET DYNAMIC COLOR HIGHLIGHT BASED ON PACKING RESULTS
+                                let cellStyle: React.CSSProperties = {};
+                                if (lastPcs > 0 && activeColorResult) {
+                                  const remRow = activeColorResult.rows.find(row => row.sizes[sz] > 0 && isRemainderRow(row, activeColorConfig));
+                                  if (remRow) {
+                                    const remColor = getRemainderRowColor(remRow, activeColorResult, activeColorConfig, darkMode);
+                                    if (remColor) {
+                                      cellStyle = {
+                                        backgroundColor: remColor.bg,
+                                        color: remColor.text,
+                                        fontWeight: 'black'
+                                      };
+                                    }
+                                  }
+                                }
+                                
+                                return (
+                                  <td key={sz} className={`p-2 border-r font-mono font-black ${darkMode ? 'border-slate-800 text-slate-100' : 'border-slate-200 text-slate-805'}`} style={cellStyle}>
+                                    {lastPcs}
+                                  </td>
+                                );
+                              })}
+                              <td className="p-2 font-black text-red-500 bg-red-500/5">{sumQtyLastPcs}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
                   </div>
                 </div>
               </motion.div>
-            )}
+            );
+          })()}
 
               {activeInputTab === 'packing_list' && (
                 <motion.div
@@ -2768,7 +2991,10 @@ export default function App() {
                                     const origColor = colors.find(c => c.nom === res.nom);
                                     const showSkuCol = printColumns.sku && !!(origColor && Object.values(origColor.sizes || {}).some((s: any) => s.sku && String(s.sku).trim() !== ''));
                                     return (
-                                      <tr key={rIdx} className="hover:bg-slate-800/40 divide-x divide-slate-800/40">
+                                      <tr
+                                        key={rIdx}
+                                        className="hover:bg-slate-800/40 divide-x divide-slate-800/40"
+                                      >
                                         {printColumns.ctn && (
                                           <>
                                             <td className="py-2 px-2 text-center font-bold text-slate-350 col-ctn-index">
@@ -2866,11 +3092,13 @@ export default function App() {
                                       const currentStart = seqNum;
                                       const currentEnd = seqNum + row.nbr - 1;
                                       seqNum += row.nbr;
+                                      const rowBg = bgCode;
+                                      const rowTextColor = undefined;
                                       return (
                                         <tr
                                           key={`${ci}-${rIdx}`}
                                           className="hover:bg-slate-800/20 divide-x divide-slate-800/40 font-medium"
-                                          style={{ backgroundColor: bgCode }}
+                                          style={{ backgroundColor: rowBg, color: rowTextColor }}
                                         >
                                           {printColumns.ctn && (
                                             <>

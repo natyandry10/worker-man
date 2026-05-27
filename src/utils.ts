@@ -25,6 +25,56 @@ export function parseCartonRange(range: string): { start: string; end: string } 
   return { start, end };
 }
 
+export function isRemainderRow(row: PackedRow, colorConfig: ColorConfig | undefined): boolean {
+  if (row.type === 'mixed' || row.type === 'solid_r') {
+    return true;
+  }
+  if (row.type === 'solid') {
+    const sizeNames = Object.keys(row.sizes);
+    if (sizeNames.length === 1) {
+      const t = sizeNames[0];
+      const cap = colorConfig?.sizes[t]?.cap ?? 25;
+      if (row.pcsPerCarton < cap) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+export function getRemainderRowColor(
+  row: PackedRow,
+  res: ColorResult,
+  colorConfig: ColorConfig | undefined,
+  darkMode: boolean
+) {
+  if (!isRemainderRow(row, colorConfig)) return null;
+  
+  const remainderRows = res.rows.filter(r => isRemainderRow(r, colorConfig));
+  const index = remainderRows.findIndex(r => r.cartonRange === row.cartonRange && r.type === row.type && r.pcsPerCarton === row.pcsPerCarton);
+  if (index === -1) return null;
+  
+  const palette = [
+    { bg: '#fef08a', text: '#000000', darkBg: '#d97706', darkText: '#ffffff' }, // Yellow / Amber
+    { bg: '#bbf7d0', text: '#000000', darkBg: '#16a34a', darkText: '#ffffff' }, // Green
+    { bg: '#bfdbfe', text: '#000000', darkBg: '#2563eb', darkText: '#ffffff' }, // Blue
+    { bg: '#fbcfe8', text: '#000000', darkBg: '#db2777', darkText: '#ffffff' }, // Pink
+    { bg: '#e9d5ff', text: '#000000', darkBg: '#9333ea', darkText: '#ffffff' }, // Purple
+    { bg: '#fed7aa', text: '#000000', darkBg: '#ea580c', darkText: '#ffffff' }, // Orange
+    { bg: '#99f6e4', text: '#000000', darkBg: '#0d9488', darkText: '#ffffff' }, // Teal
+    { bg: '#fcd34d', text: '#000000', darkBg: '#ca8a04', darkText: '#ffffff' }  // Amber
+  ];
+  
+  const c = palette[index % palette.length];
+  return {
+    bg: darkMode ? c.darkBg : c.bg,
+    text: darkMode ? '#ffffff' : '#000000',
+    border: darkMode ? 'border-amber-500/30' : 'border-slate-300',
+    rawBg: c.bg,
+    rawText: '#000000'
+  };
+}
+
 /**
  * Computes how items are packed and calculates weights, CBM, and carton numbers sequentially.
  */
@@ -832,6 +882,12 @@ export async function exportToExcel(
   // 1. INDIVIDUAL SHEETS FOR EACH COLOR
   allResults.forEach((res, ci) => {
     const { nom, color, rows, totals } = res;
+    const colorConfig = {
+      nom: res.nom,
+      mode: res.mode,
+      tailles: res.tailles,
+      sizes: originalSizesInputs[ci]?.D || {}
+    } as ColorConfig;
     // Always show standard XS to 2XL, and show 3XL/4XL only if they are positive
     const tailles = res.tailles.filter(t => isStandardSizeAlwaysShown(t) || (originalSizesInputs[ci]?.D[t]?.qtyTot || 0) > 0);
     
@@ -1013,8 +1069,8 @@ export async function exportToExcel(
         cell.value = val;
         cell.border = borderThin;
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + (isEven ? colorsHex.rowA : colorsHex.rowB) } };
 
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + (isEven ? colorsHex.rowA : colorsHex.rowB) } };
         if (valIdx === 0 || valIdx === 1) {
           cell.font = { color: { argb: 'FF' + colorsHex.navyBg }, size: 10, bold: true };
         } else if (valIdx === 2) {
@@ -1233,6 +1289,12 @@ export async function exportToExcel(
 
     allResults.forEach((res, ci) => {
       const { nom, rows } = res;
+      const colorConfig = {
+        nom: res.nom,
+        mode: res.mode,
+        tailles: res.tailles,
+        sizes: originalSizesInputs[ci]?.D || {}
+      } as ColorConfig;
       rows.forEach(r => {
         const isEven = dataRowCount % 2 === 0;
         const combRow = wsComb.getRow(ri);
@@ -1264,8 +1326,8 @@ export async function exportToExcel(
           cell.value = val;
           cell.border = borderThin;
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + (isEven ? colorsHex.rowA : colorsHex.rowB) } };
 
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + (isEven ? colorsHex.rowA : colorsHex.rowB) } };
           if (valIdx === 0 || valIdx === 1) {
             cell.font = { color: { argb: 'FF' + colorsHex.navyBg }, size: 10, bold: true };
           } else if (valIdx === 2) {

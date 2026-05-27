@@ -361,6 +361,7 @@ export function computeColorResult(
     color,
     tailles,
     mode: activeMode,
+    colorIndex,
     rows,
     totals: {
       c: totC,
@@ -879,19 +880,146 @@ export async function exportToExcel(
 
   wsRecap.getRow(recapRowIdx).height = 24;
 
+  // 0.C SAISIE COLISAGE SHEET (INPUT GRID ORIGINAL VALUES)
+  const wsSaisie = wb.addWorksheet('SAISIE COLISAGE', {
+    pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1 }
+  });
+
+  wsSaisie.columns = [
+    { width: 30 }, // Column 1: Parameter name
+    ...Array.from({ length: 15 }).map(() => ({ width: 14 })) // Size columns space
+  ];
+
+  wsSaisie.mergeCells('A1:P1');
+  const saisieTitle = wsSaisie.getCell('A1');
+  saisieTitle.value = "GRILLE DE SAISIE DE COLISAGE ORIGINAL (DONNÉES CLIENT / INPUTS)";
+  saisieTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.navyBg } };
+  saisieTitle.font = { color: { argb: 'FF' + colorsHex.navyFg }, size: 14, bold: true, name: 'Calibri' };
+  saisieTitle.alignment = { horizontal: 'center', vertical: 'middle' };
+  wsSaisie.getRow(1).height = 36;
+
+  wsSaisie.mergeCells('A2:P2');
+  const saisieSub = wsSaisie.getCell('A2');
+  saisieSub.value = "VALEURS INITIALES DES QUANTITÉS À EMBALLER, CAPACITÉS MAX PAR CARTON ET SKU PAR TAILLE ET COULEUR";
+  saisieSub.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEBF4FF' } };
+  saisieSub.font = { color: { argb: 'FF' + colorsHex.infoFg }, size: 10, bold: true, italic: true };
+  saisieSub.alignment = { horizontal: 'center', vertical: 'middle' };
+  wsSaisie.getRow(2).height = 24;
+
+  let sRowIdx = 4;
+
+  allResults.forEach((res, ci) => {
+    const realIdx = res.colorIndex ?? ci;
+    const sizes = originalSizesInputs[realIdx]?.D || {};
+    const tailles = res.tailles; 
+
+    // 1. Color banner Row
+    wsSaisie.mergeCells(sRowIdx, 1, sRowIdx, tailles.length + 1);
+    const colorHeaderCell = wsSaisie.getRow(sRowIdx).getCell(1);
+    colorHeaderCell.value = `🎨 COULEUR : ${res.nom.toUpperCase()}`;
+    colorHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.styleBg } };
+    colorHeaderCell.font = { color: { argb: 'FFFFFFFF' }, size: 11, bold: true };
+    colorHeaderCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    wsSaisie.getRow(sRowIdx).height = 24;
+    sRowIdx++;
+
+    // 2. Table Header (Sizes row)
+    const hdrRow = wsSaisie.getRow(sRowIdx);
+    const paramCell = hdrRow.getCell(1);
+    paramCell.value = "PARAMÈTRE DE COLISAGE";
+    paramCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.blueBg } };
+    paramCell.font = { color: { argb: 'FF' + colorsHex.blueFg }, size: 10, bold: true };
+    paramCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    paramCell.border = borderThin;
+
+    tailles.forEach((t, tIdx) => {
+      const sizeCell = hdrRow.getCell(tIdx + 2);
+      sizeCell.value = t;
+      sizeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorsHex.blueBg } };
+      sizeCell.font = { color: { argb: 'FF' + colorsHex.blueFg }, size: 10, bold: true };
+      sizeCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      sizeCell.border = borderThin;
+    });
+    wsSaisie.getRow(sRowIdx).height = 22;
+    sRowIdx++;
+
+    // 3. Row QtyTot
+    const qtyRow = wsSaisie.getRow(sRowIdx);
+    const qtyTitleCell = qtyRow.getCell(1);
+    qtyTitleCell.value = "Quantité Totale à Emballer";
+    qtyTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    qtyTitleCell.font = { size: 10, bold: true };
+    qtyTitleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    qtyTitleCell.border = borderThin;
+
+    tailles.forEach((t, tIdx) => {
+      const cell = qtyRow.getCell(tIdx + 2);
+      cell.value = sizes[t]?.qtyTot || 0;
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      cell.font = { size: 10, bold: true };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = borderThin;
+    });
+    wsSaisie.getRow(sRowIdx).height = 20;
+    sRowIdx++;
+
+    // 4. Row Capacidad
+    const capRow = wsSaisie.getRow(sRowIdx);
+    const capTitleCell = capRow.getCell(1);
+    capTitleCell.value = "Pièces Max par Carton (Cap)";
+    capTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    capTitleCell.font = { size: 10, bold: true };
+    capTitleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    capTitleCell.border = borderThin;
+
+    tailles.forEach((t, tIdx) => {
+      const cell = capRow.getCell(tIdx + 2);
+      cell.value = sizes[t]?.cap || 0;
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      cell.font = { size: 10 };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = borderThin;
+    });
+    wsSaisie.getRow(sRowIdx).height = 20;
+    sRowIdx++;
+
+    // 5. Row SKU
+    const skuRow = wsSaisie.getRow(sRowIdx);
+    const skuTitleCell = skuRow.getCell(1);
+    skuTitleCell.value = "SKU spécifique (facultatif)";
+    skuTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9F9F9' } };
+    skuTitleCell.font = { size: 10, bold: true, color: { argb: 'FF1A5C2A' } };
+    skuTitleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    skuTitleCell.border = borderThin;
+
+    tailles.forEach((t, tIdx) => {
+      const cell = skuRow.getCell(tIdx + 2);
+      cell.value = sizes[t]?.sku || '';
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      cell.font = { size: 9, color: { argb: 'FF1A5C2A' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = borderThin;
+    });
+    wsSaisie.getRow(sRowIdx).height = 20;
+    sRowIdx++;
+
+    sRowIdx += 2;
+  });
+
   // 1. INDIVIDUAL SHEETS FOR EACH COLOR
   allResults.forEach((res, ci) => {
     const { nom, color, rows, totals } = res;
+    const realIdx = res.colorIndex ?? ci;
     const colorConfig = {
       nom: res.nom,
       mode: res.mode,
       tailles: res.tailles,
-      sizes: originalSizesInputs[ci]?.D || {}
+      sizes: originalSizesInputs[realIdx]?.D || {}
     } as ColorConfig;
     // Always show standard XS to 2XL, and show 3XL/4XL only if they are positive
-    const tailles = res.tailles.filter(t => isStandardSizeAlwaysShown(t) || (originalSizesInputs[ci]?.D[t]?.qtyTot || 0) > 0);
+    const tailles = res.tailles.filter(t => isStandardSizeAlwaysShown(t) || (originalSizesInputs[realIdx]?.D[t]?.qtyTot || 0) > 0);
     
-    const sizeSpecInputs = originalSizesInputs[ci];
+    const sizeSpecInputs = originalSizesInputs[realIdx];
     const hasAnySku = !!(sizeSpecInputs && Object.values(sizeSpecInputs.D).some((s: any) => s && s.sku && String(s.sku).trim() !== ''));
     const isSkuColShown = printColumns ? !!(printColumns.sku && hasAnySku) : hasAnySku;
     const nc = tailles.length + (isSkuColShown ? 10 : 9);
@@ -1182,8 +1310,9 @@ export async function exportToExcel(
   if (allResults.length > 1) {
     let combinedSizes: string[] = [];
     allResults.forEach((r, rIdx) => {
+      const realIdx = r.colorIndex ?? rIdx;
       r.tailles.forEach(t => {
-        const qty = originalSizesInputs[rIdx]?.D[t]?.qtyTot || 0;
+        const qty = originalSizesInputs[realIdx]?.D[t]?.qtyTot || 0;
         const isAlways = isStandardSizeAlwaysShown(t);
         if ((isAlways || qty > 0) && !combinedSizes.includes(t)) {
           combinedSizes.push(t);
@@ -1191,8 +1320,9 @@ export async function exportToExcel(
       });
     });
 
-    const hasAnySkuCombined = allResults.some((_, rIdx) => {
-      const sizeSpecInputs = originalSizesInputs[rIdx];
+    const hasAnySkuCombined = allResults.some((res, rIdx) => {
+      const realIdx = res.colorIndex ?? rIdx;
+      const sizeSpecInputs = originalSizesInputs[realIdx];
       return sizeSpecInputs && Object.values(sizeSpecInputs.D).some((s: any) => s && s.sku && String(s.sku).trim() !== '');
     });
     const isSkuColShownCombined = printColumns ? !!(printColumns.sku && hasAnySkuCombined) : hasAnySkuCombined;
@@ -1289,11 +1419,12 @@ export async function exportToExcel(
 
     allResults.forEach((res, ci) => {
       const { nom, rows } = res;
+      const realIdx = res.colorIndex ?? ci;
       const colorConfig = {
         nom: res.nom,
         mode: res.mode,
         tailles: res.tailles,
-        sizes: originalSizesInputs[ci]?.D || {}
+        sizes: originalSizesInputs[realIdx]?.D || {}
       } as ColorConfig;
       rows.forEach(r => {
         const isEven = dataRowCount % 2 === 0;

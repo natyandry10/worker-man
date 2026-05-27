@@ -84,6 +84,7 @@ export interface ColorResult {
   color: string;
   tailles: string[];
   mode: 'strict_solide' | 'mixte_autorise';
+  colorIndex?: number;
   rows: PackedRow[];
   totals: {
     c: number; // cartons

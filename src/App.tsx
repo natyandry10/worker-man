@@ -589,7 +589,7 @@ export default function App() {
     const nextColors = colors.map((c, i) => {
       if (i !== activeColorIdx) return c;
       const nextSizes = { ...c.sizes };
-      const valNum = typeof val === 'string' ? parseFloat(val) || 0 : val;
+      const valNum = field === 'sku' ? String(val) : (typeof val === 'string' ? parseFloat(val) || 0 : val);
 
       nextSizes[sizeName] = {
         ...nextSizes[sizeName],
@@ -603,6 +603,78 @@ export default function App() {
     setHasGenerated(false);
 
     if (field === 'qtyTot') {
+      updateFilenameAndTotal(meta, nextColors);
+    }
+  };
+
+  const handlePasteGrid2D = (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    startingSizeName: string,
+    startingField: keyof SizeDetails
+  ) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    if (!pastedText) return;
+
+    // Split text into rows (by newline) and cells (by tab)
+    const lines = pastedText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '');
+    if (lines.length === 0) return;
+
+    const activeColorConfig = colors[activeColorIdx];
+    if (!activeColorConfig) return;
+
+    const sizeIndex = activeColorConfig.tailles.indexOf(startingSizeName);
+    if (sizeIndex === -1) return;
+
+    // Fields sequence in the Grid UI:
+    const fieldsSeq: (keyof SizeDetails)[] = ['qtyTot', 'cap', 'sku'];
+    const startingFieldIdx = fieldsSeq.indexOf(startingField);
+    if (startingFieldIdx === -1) return;
+
+    const nextColors = colors.map((c, idx) => {
+      if (idx !== activeColorIdx) return c;
+      const nextSizes = { ...c.sizes };
+
+      lines.forEach((lineText, lineOffset) => {
+        const fieldIdx = startingFieldIdx + lineOffset;
+        if (fieldIdx >= fieldsSeq.length) return; // Exceeds the grid row fields
+        const currentField = fieldsSeq[fieldIdx];
+
+        // Split columns of this line. Excel tabs first, fall back to spaces if single column
+        const cols = lineText.split('\t');
+        const valuesList = cols.length > 1 ? cols : lineText.split(/[\s,]+/);
+
+        valuesList.forEach((rawVal, colOffset) => {
+          const destIdx = sizeIndex + colOffset;
+          if (destIdx < c.tailles.length) {
+            const destSizeName = c.tailles[destIdx];
+            const valStr = rawVal.trim();
+            if (valStr !== '') {
+              if (currentField === 'sku') {
+                nextSizes[destSizeName] = {
+                  ...nextSizes[destSizeName],
+                  sku: valStr
+                };
+              } else {
+                const valNum = parseFloat(valStr);
+                nextSizes[destSizeName] = {
+                  ...nextSizes[destSizeName],
+                  [currentField]: isNaN(valNum) ? 0 : valNum
+                };
+              }
+            }
+          }
+        });
+      });
+
+      return { ...c, sizes: nextSizes };
+    });
+
+    setColors(nextColors);
+    setHasGenerated(false);
+
+    // If we modified qtyTot, sync filename and totals
+    if (startingFieldIdx === 0 || lines.length > 1) {
       updateFilenameAndTotal(meta, nextColors);
     }
   };
@@ -2246,11 +2318,17 @@ export default function App() {
                   <div className={`rounded-xl border p-5 ${darkMode ? 'bg-[#121522] border-slate-800/80 shadow-black/25' : 'bg-white border-slate-200'} space-y-4 transition-all duration-300 shadow-sm`}>
                     
                     {/* Plain Static Styled Header */}
-                    <div className="flex items-center gap-2 border-b border-dashed pb-3 border-slate-800/60">
-                      <div className="w-2 h-4 bg-[#ff5000] rounded-sm" />
-                      <h2 className={`text-xs font-sans font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-700'} uppercase`}>
-                        ⌨️ Saisie des colisages par Couleur
-                      </h2>
+                    <div className="flex items-center justify-between gap-3 border-b border-dashed pb-3 border-slate-200/50 dark:border-slate-800/60 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-4 bg-[#ff5000] rounded-sm" />
+                        <h2 className={`text-xs font-sans font-bold tracking-wider ${darkMode ? 'text-slate-100' : 'text-slate-700'} uppercase`}>
+                          ⌨️ Saisie des colisages par Couleur
+                        </h2>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 dark:text-emerald-400 text-[10px] sm:text-[11px] font-sans font-semibold">
+                        <span className="text-xs">📋</span>
+                        <span>Astuce : Vous pouvez copier-coller des données directement depuis Excel (Ctrl+V) sur la grille !</span>
+                      </div>
                     </div>
 
                     <div className="space-y-4">
@@ -2522,7 +2600,10 @@ export default function App() {
                         <td className={`py-2 px-4 text-left font-sans font-semibold border-r ${
                           darkMode ? 'border-slate-800 bg-[#222636]/10 text-slate-300' : 'border-slate-200 bg-slate-100/30 text-slate-700'
                         }`}>
-                          Quantité Totale à Emballer
+                          <div className="flex flex-col">
+                            <span>Quantité Totale à Emballer</span>
+                            <span className="text-[10px] text-slate-500 font-normal italic font-mono">Presse-papiers Excel tolléré</span>
+                          </div>
                         </td>
                         {colors[activeColorIdx].tailles.map((sz) => {
                           const qTot = colors[activeColorIdx].sizes[sz]?.qtyTot || 0;
@@ -2543,6 +2624,7 @@ export default function App() {
                                 min="0"
                                 value={colors[activeColorIdx].sizes[sz]?.qtyTot || ''}
                                 onChange={(e) => handleUpdateSizeCell(sz, 'qtyTot', e.target.value)}
+                                onPaste={(e) => handlePasteGrid2D(e, sz, 'qtyTot')}
                                 className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
                                   remColor
                                     ? ''
@@ -2572,6 +2654,7 @@ export default function App() {
                               min="1"
                               value={colors[activeColorIdx].sizes[sz]?.cap || ''}
                               onChange={(e) => handleUpdateSizeCell(sz, 'cap', e.target.value)}
+                              onPaste={(e) => handlePasteGrid2D(e, sz, 'cap')}
                               className={`w-full text-center py-1.5 font-bold rounded-md bg-transparent border focus:outline-none transition-all ${
                                 darkMode
                                   ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-slate-300'
@@ -2596,6 +2679,7 @@ export default function App() {
                               type="text"
                               value={colors[activeColorIdx].sizes[sz]?.sku || ''}
                               onChange={(e) => handleUpdateSizeCell(sz, 'sku', e.target.value)}
+                              onPaste={(e) => handlePasteGrid2D(e, sz, 'sku')}
                               className={`w-full text-center py-1 font-mono font-semibold text-[11px] uppercase rounded-md border focus:outline-none transition-all ${
                                 darkMode
                                   ? 'bg-[#222636] border-slate-800 focus:border-[#ff5000] focus:ring-1 focus:ring-[#ff5000]/10 text-emerald-350'

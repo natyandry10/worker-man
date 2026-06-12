@@ -1,6 +1,5 @@
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import isDev from 'electron-is-dev';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -13,10 +12,12 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
+    icon: path.join(__dirname, '../assets/icon.ico'),
   });
 
+  const isDev = process.env.ELECTRON_DEV === 'true';
   const startUrl = isDev
-    ? 'http://localhost:5173' // Port Vite par défaut
+    ? 'http://localhost:5173'
     : `file://${path.join(__dirname, '../dist/index.html')}`;
 
   mainWindow.loadURL(startUrl);

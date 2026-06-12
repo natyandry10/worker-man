@@ -1,29 +1,41 @@
-import { defineConfig } from 'electron-vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-import path from 'path';
+import { defineConfig } from 'electron-vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
 export default defineConfig({
   main: {
-    build: {
-      outDir: 'dist-electron',
-    },
+    entry: 'electron/main.ts',
+    vite: {
+      build: {
+        outDir: 'dist-electron',
+        rollupOptions: {
+          external: Object.keys('dependencies' in require('./package.json') ? require('./package.json').dependencies : {})
+        }
+      }
+    }
   },
   preload: {
-    build: {
-      outDir: 'dist-electron',
-    },
+    entry: 'electron/preload.ts',
+    vite: {
+      build: {
+        outDir: 'dist-electron',
+        rollupOptions: {
+          external: Object.keys('dependencies' in require('./package.json') ? require('./package.json').dependencies : {})
+        }
+      }
+    }
   },
   renderer: {
     root: '.',
     build: {
-      outDir: 'dist',
+      outDir: 'dist'
     },
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
-    },
-  },
-});
+        '@': path.resolve(__dirname, '.')
+      }
+    }
+  }
+})
